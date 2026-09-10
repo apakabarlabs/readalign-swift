@@ -21,8 +21,6 @@ struct AlignCase: Codable, CustomTestStringConvertible {
 
     var testDescription: String { name }
 
-    /// A case that asserts nothing passes for the wrong reason, and a mistyped key
-    /// decodes to nothing rather than to an error.
     var assertsSomething: Bool {
         wantEmpty == true || !(want ?? []).isEmpty || strictlyIncreasing != nil
     }

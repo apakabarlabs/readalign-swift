@@ -2,7 +2,6 @@ import Foundation
 import Testing
 @testable import ReadAlign
 
-/// A written word and the heard word the matching found for it.
 struct FoundPair: Codable {
     let word: Int
     let text: String
@@ -27,8 +26,6 @@ struct FillCase: Codable, CustomTestStringConvertible {
 
     var testDescription: String { name }
 
-    /// A case that asserts nothing passes for the wrong reason, and a mistyped key
-    /// decodes to nothing rather than to an error.
     var assertsSomething: Bool {
         !(want ?? []).isEmpty || nonOverlapping == true
     }

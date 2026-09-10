@@ -3,11 +3,7 @@ import SwiftEmbed
 import Testing
 @testable import ReadAlign
 
-/// The cases live in YAML so that every port of this package is held to the same
-/// ones. What stays here is only what runs them.
 enum Corpus {
-    /// Times are written out to the millisecond, so anything closer than that is the
-    /// same instant said two ways.
     static let tolerance = 0.001
 
     static func load<T: Decodable>(_ path: String, as type: T.Type = T.self) -> T {
@@ -25,9 +21,6 @@ struct HeardWord: Codable {
     }
 }
 
-/// What a case says about one word's span. Every field is optional: a case pins
-/// what it was written to pin, and filling the rest in from whatever the code
-/// currently returns would only record the code's opinion of itself.
 struct SpanExpectation: Codable {
     let word: Int
     let start: TimeInterval?
@@ -44,7 +37,6 @@ struct SpanExpectation: Codable {
     }
 }
 
-/// Named weightings, so a case can ask for one without the corpus knowing Swift.
 enum WeightingName: String, Codable {
     case english
     case even
@@ -75,9 +67,6 @@ extension WordSpan {
     }
 }
 
-/// True of every result, whatever the case was written to show: a span for every
-/// written word, no span ending before it starts, and none of them going backwards.
-/// Stated once here rather than repeated in each case.
 func expectWellFormed(_ spans: [WordSpan], count: Int, in name: String) {
     #expect(spans.count == count, "\(name): one span per word")
     for (index, span) in spans.enumerated() {

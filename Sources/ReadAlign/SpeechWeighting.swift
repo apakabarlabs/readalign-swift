@@ -1,15 +1,7 @@
-/// How long a word takes to say, relative to its neighbours.
-///
-/// A protocol rather than a function so each language brings its own: syllable
-/// counting by vowel groups holds for English and breaks on languages that write
-/// vowels differently or not at all.
 public protocol SpeechWeighting: Sendable {
     func weight(of word: String) -> Double
 }
 
-/// Vowel groups, minus a silent final "e". Wrong on plenty of words ("fire",
-/// "buried"), which is affordable while it only decides whether "self-substantial"
-/// gets four times the airtime of "I".
 public struct EnglishSyllableWeighting: SpeechWeighting {
     public init() {}
 
@@ -36,8 +28,6 @@ public struct EnglishSyllableWeighting: SpeechWeighting {
     }
 }
 
-/// Every word weighs the same. For a language whose syllables this package cannot
-/// count, which shares an unmatched run out evenly rather than plausibly.
 public struct EvenWeighting: SpeechWeighting {
     public init() {}
 
