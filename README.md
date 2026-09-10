@@ -59,13 +59,13 @@ Time is shared out among unmatched words by `SpeechWeighting`. `EnglishSyllableW
 
 ## Install
 
-While the repository is private this package carries no version tags, so a consumer pins the commit it read:
-
 ```swift
-.package(url: "https://github.com/apakabarlabs/readalign-swift", revision: "<commit>")
+.package(path: "../../readalign-swift")
 ```
 
-A `from:` requirement resolves to nothing until the first tag is cut.
+Our own apps take it from the checkout beside them, so a change here is in the app on the next build without a hop through a tag.
+
+The repository carries no version tags yet, so a `from:` requirement resolves to nothing; an outside consumer pins a commit until the first tag is cut.
 
 ## The case corpus
 
