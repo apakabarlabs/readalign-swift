@@ -5,10 +5,10 @@ struct Alignment {
     let equivalent: ((String, String, String?) -> Bool)?
     let printedParts: [Int]
 
-    let gapPenalty = -0.5
-    let mismatchPenalty = -1.5
+    let gapPenalty = Rules.shared.gapPenalty
+    let mismatchPenalty = Rules.shared.mismatchPenalty
 
-    var joinThreshold: Double { max(threshold, 0.9) }
+    var joinThreshold: Double { max(threshold, Rules.shared.joinFloor) }
 
     func joinable(_ words: ArraySlice<String>) -> Bool {
         words.allSatisfy { !$0.isEmpty }

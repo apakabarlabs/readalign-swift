@@ -118,9 +118,13 @@ The same sharing happens inside a single match when several written words were h
 
 `similarity` is edit distance over the longer length: `1` for identical, `0` for nothing in common.
 
-## The case corpus
+## What is shared with the other ports
 
-The cases live in YAML under `Tests/ReadAlignTests/Resources/`, one file per function, and every port of this package is held to the same ones. What stays in Swift is only the runner.
+Two things live as data rather than as code, so that a port in another language reads them instead of holding its own copy.
+
+`Sources/ReadAlign/Resources/rules.yaml` holds the numbers the alignment is tuned to: the two bars, the price of a gap and of a bad pair, the shortest span a word can be found at, and the letters the English weighting counts as vowels. Changing one of them changes every port, rather than leaving them quietly apart.
+
+The cases live in YAML under `Tests/ReadAlignTests/Resources/`, one file per function, and every port is held to the same ones. What stays in Swift is only the runner.
 
 A case pins what it was written to pin and nothing else: `want` lists spans by word index, with `start` and `end` both optional. Filling the rest in from whatever the code currently returns would record the code's opinion of itself rather than a requirement. What is true of every result — a span for every written word, no span ending before it starts, none of them going backwards — is stated once in the runner instead of being copied into each case. A case that asserts nothing fails, so a mistyped key cannot pass for agreement.
 

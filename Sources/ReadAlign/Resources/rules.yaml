@@ -1,0 +1,23 @@
+# The numbers the alignment is tuned to. Shared by every port of this library, so
+# that changing one changes all of them rather than leaving them quietly apart.
+#
+# What each is for is written up in the README, under "How it works".
+
+# How alike two words must be to count as the same word.
+match_threshold: 0.6
+
+# A join is held to at least this, however low the match bar is set: loosely,
+# joining swallows the neighbouring word whole.
+join_floor: 0.9
+
+# Passing a word over, on either side.
+gap_penalty: -0.5
+
+# A pairing below its bar. Only its being worse than two gaps matters.
+mismatch_penalty: -1.5
+
+# Shorter than this and a word has no stretch of the recording to be found at.
+room_enough: 0.04
+
+# Letters that open a syllable for the English weighting.
+english_vowels: "aeiouy"

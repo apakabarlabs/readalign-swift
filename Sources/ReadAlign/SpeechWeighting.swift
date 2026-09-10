@@ -10,7 +10,7 @@ public struct EnglishSyllableWeighting: SpeechWeighting {
     }
 
     public func syllableCount(of word: String) -> Int {
-        let vowels = Set("aeiouy")
+        let vowels = Set(Rules.shared.englishVowels)
         let letters = word.lowercased().filter { $0.isLetter }
         guard !letters.isEmpty else { return 1 }
 

@@ -33,7 +33,7 @@ public struct WordMatch: Sendable, Equatable {
 }
 
 public enum TranscriptAligner {
-    public static let matchThreshold = 0.6
+    public static let matchThreshold = Rules.shared.matchThreshold
 
     public static func align(
         expected: [String],
@@ -153,7 +153,7 @@ public enum TranscriptAligner {
         return timings.compactMap { $0 }
     }
 
-    private static let roomEnough: TimeInterval = 0.04
+    private static let roomEnough = Rules.shared.roomEnough
 
     private static func swallower(
         of run: Range<Int>,
