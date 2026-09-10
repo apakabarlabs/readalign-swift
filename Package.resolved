@@ -1,0 +1,24 @@
+{
+  "originHash" : "b5c012fabe07c8887cc4d8e890e8ad7e965cd78faff87dc20575def66e850ecf",
+  "pins" : [
+    {
+      "identity" : "swift-embed",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/botforge-pro/swift-embed",
+      "state" : {
+        "revision" : "303c3b8ff91fbf1f679f351774d4a7dc5ab11528",
+        "version" : "1.5.0"
+      }
+    },
+    {
+      "identity" : "yams",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/jpsim/Yams.git",
+      "state" : {
+        "revision" : "a27b21e0c81c5bf42049b897a62aaf387e80f279",
+        "version" : "6.2.2"
+      }
+    }
+  ],
+  "version" : 3
+}

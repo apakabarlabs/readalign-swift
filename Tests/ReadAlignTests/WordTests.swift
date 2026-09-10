@@ -1,0 +1,54 @@
+import Foundation
+import Testing
+@testable import ReadAlign
+
+struct NormalizeCase: Codable, CustomTestStringConvertible {
+    let word: String
+    let want: String
+
+    var testDescription: String { "\(word) -> \(want)" }
+}
+
+struct SimilarityCase: Codable, CustomTestStringConvertible {
+    let left: String
+    let right: String
+    let equals: Double?
+    let atLeast: Double?
+    let atMost: Double?
+
+    enum CodingKeys: String, CodingKey {
+        case left, right, equals
+        case atLeast = "at_least"
+        case atMost = "at_most"
+    }
+
+    var testDescription: String { "\(left) against \(right)" }
+}
+
+struct WordFile: Codable {
+    let normalize: [NormalizeCase]
+    let similarity: [SimilarityCase]
+}
+
+struct WordTests {
+    static let file: WordFile = Corpus.load("word_tests.yaml", as: WordFile.self)
+
+    @Test(arguments: file.normalize)
+    func normalizesAsTheCorpusSays(normalizeCase: NormalizeCase) {
+        #expect(TranscriptAligner.normalize(normalizeCase.word) == normalizeCase.want)
+    }
+
+    @Test(arguments: file.similarity)
+    func scoresLikenessAsTheCorpusSays(similarityCase: SimilarityCase) {
+        let score = TranscriptAligner.similarity(similarityCase.left, similarityCase.right)
+        if let exact = similarityCase.equals {
+            #expect(abs(score - exact) < Corpus.tolerance)
+        }
+        if let floor = similarityCase.atLeast {
+            #expect(score >= floor)
+        }
+        if let ceiling = similarityCase.atMost {
+            #expect(score <= ceiling)
+        }
+    }
+}

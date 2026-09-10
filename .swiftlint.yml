@@ -1,0 +1,10 @@
+disabled_rules:
+  - identifier_name
+
+included:
+  - Sources
+  - Tests
+
+excluded:
+  - .build
+  - Package.swift

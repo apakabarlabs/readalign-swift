@@ -1,0 +1,24 @@
+# The two word-level helpers the alignment is built on.
+#
+# `normalize` strips what a recogniser drops or invents. `similarity` is 1 for
+# identical and 0 for nothing in common; a case pins it with `equals`, `at_least`
+# or `at_most`, because most of what matters about it is which side of a bar it
+# falls on rather than its exact value.
+normalize:
+  - word: "beauty’s"
+    want: "beautys"
+  - word: "Feed'st"
+    want: "feedst"
+  - word: "world-without-end"
+    want: "worldwithoutend"
+
+similarity:
+  - left: "beautys"
+    right: "beautys"
+    equals: 1.0
+  - left: "feedst"
+    right: "feed"
+    at_least: 0.6
+  - left: "thou"
+    right: "increase"
+    at_most: 0.4

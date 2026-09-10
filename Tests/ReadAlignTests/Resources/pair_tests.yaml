@@ -1,0 +1,56 @@
+# Which written word came back as which heard word.
+#
+# `want` lists the matches a case is about; `want_absent` lists matches that must
+# not be made. Neither is a complete list of what the alignment returns: a case
+# pins what it was written to pin and nothing else.
+#
+# Ranges are [lower, upper), half-open, as they are printed in the sources.
+tests:
+  - section: "A word boundary the recogniser moved"
+    cases:
+      - name: "a pair whose boundary the recogniser moved is matched as a pair"
+        why: >
+          "shouldst owe" and "should stow" are the same sound: the recogniser put
+          the word boundary one consonant cluster to the left. Matched word against
+          word, the reader is told they did not say two words they said perfectly,
+          and no retake helps -- there is nothing in the audio to hear differently.
+        expected: ["hearts", "shouldst", "owe"]
+        heard: ["hearts", "should", "stow"]
+        threshold: 0.6
+        want:
+          - expected: [1, 3]
+            heard: [1, 3]
+
+      - name: "a pair that only shares its place is not joined"
+        why: >
+          The join is only for a boundary that moved inside the same sound. Two
+          written words against two heard words that merely stand in the same place
+          are two mistakes, and joining them would hide both.
+        expected: ["kingdoms", "hearts"]
+        heard: ["stumbling", "blocks"]
+        threshold: 0.6
+        want_absent:
+          - expected: [0, 2]
+            heard: [0, 2]
+
+  - section: "A compound written with hyphens"
+    cases:
+      - name: "a compound of three parts matches the three words it is heard as"
+        why: >
+          Print says how many words a compound is heard as: "world-without-end" is
+          three. Without that count the join stops at a pair and the compound is
+          matched against its first two parts alone.
+        expected: ["chide", "the", "world-without-end", "hour"]
+        heard: ["chide", "the", "world", "without", "end", "hour"]
+        threshold: 0.6
+        want:
+          - expected: [2, 3]
+            heard: [2, 5]
+
+      - name: "a compound of two parts matches the two words it is heard as"
+        expected: ["and", "swift-footed", "time"]
+        heard: ["and", "swift", "footed", "time"]
+        threshold: 0.6
+        want:
+          - expected: [1, 2]
+            heard: [1, 3]

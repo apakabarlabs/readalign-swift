@@ -1,0 +1,40 @@
+# Where each written word was heard, before unmatched words are given a time.
+#
+# A case pins the words it was written about. `contiguous` says that the spans of
+# a range of words touch end to start, which is how several written words share
+# the one token they were heard as.
+tests:
+  - section: "The two sides disagree about where a word ends"
+    cases:
+      - name: "two printed words heard as one share the stretch between them"
+        why: >
+          "every where" is printed as two words and heard as one. Both were given
+          the whole stretch it was heard in, which leaves them lying on top of each
+          other; holding a word open then closes the first at the second's start,
+          which is where it began, and it ends up with no length at all. No instant
+          of the recording falls inside a word of no length, so a mark that runs
+          along the line as the recording plays passes straight over it, every time.
+        expected: ["and", "bareness", "every", "where"]
+        heard:
+          - {text: "and", start: 22.43, end: 22.59}
+          - {text: "bareness", start: 22.59, end: 23.15}
+          - {text: "everywhere", start: 23.15, end: 24.03}
+        want:
+          - {word: 2, start: 23.15}
+          - {word: 3, end: 24.03}
+        contiguous: [2, 4]
+
+      - name: "a compound heard as several words is timed across all of them"
+        why: >
+          The other way round: one printed word heard as several. Timed from the
+          first of them alone, the compound ended where its first part did.
+        expected: ["chide", "the", "world-without-end", "hour"]
+        heard:
+          - {text: "chide", start: 1.0, end: 1.4}
+          - {text: "the", start: 1.4, end: 1.5}
+          - {text: "world", start: 1.5, end: 1.8}
+          - {text: "without", start: 1.8, end: 2.2}
+          - {text: "end", start: 2.2, end: 2.5}
+          - {text: "hour", start: 2.5, end: 2.9}
+        want:
+          - {word: 2, start: 1.5, end: 2.5}

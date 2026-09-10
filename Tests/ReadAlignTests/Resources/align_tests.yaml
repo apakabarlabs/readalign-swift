@@ -1,0 +1,112 @@
+# The whole of it: a text, what a recogniser heard, and when each written word
+# was spoken.
+#
+# Every case is held to the same three things whatever it pins: one span per
+# written word, no span ending before it starts, and spans that never go
+# backwards. `want` adds what the case itself is about.
+tests:
+  - section: "A reading the recogniser got right"
+    cases:
+      - name: "a clean transcript gives every word the time it was heard at"
+        expected:
+          ["From", "fairest", "creatures", "we", "desire", "increase",
+           "That", "thereby", "beauty’s", "rose", "might", "never", "die"]
+        heard:
+          - {text: "from", start: 0, end: 0.8}
+          - {text: "fairest", start: 1, end: 1.8}
+          - {text: "creatures", start: 2, end: 2.8}
+          - {text: "we", start: 3, end: 3.8}
+          - {text: "desire", start: 4, end: 4.8}
+          - {text: "increase", start: 5, end: 5.8}
+          - {text: "that", start: 6, end: 6.8}
+          - {text: "thereby", start: 7, end: 7.8}
+          - {text: "beauty’s", start: 8, end: 8.8}
+          - {text: "rose", start: 9, end: 9.8}
+          - {text: "might", start: 10, end: 10.8}
+          - {text: "never", start: 11, end: 11.8}
+          - {text: "die", start: 12, end: 12.8}
+        duration: 20
+        want:
+          - {word: 0, start: 0}
+          - {word: 3, start: 3}
+          - {word: 12, end: 12.8}
+
+  - section: "A reading the recogniser got wrong"
+    cases:
+      - name: "a misheard word still lands on its own time"
+        why: >
+          Matched on how alike the words look rather than on equality, so a word the
+          recogniser spelled its own way keeps the time it was heard at.
+        expected:
+          ["From", "fairest", "creatures", "we", "desire", "increase",
+           "That", "thereby", "beauty’s", "rose", "might", "never", "die"]
+        heard:
+          - {text: "from", start: 0, end: 0.8}
+          - {text: "farest", start: 1, end: 1.8}
+          - {text: "creatures", start: 2, end: 2.8}
+          - {text: "we", start: 3, end: 3.8}
+          - {text: "desire", start: 4, end: 4.8}
+          - {text: "increase", start: 5, end: 5.8}
+          - {text: "that", start: 6, end: 6.8}
+          - {text: "thereby", start: 7, end: 7.8}
+          - {text: "beautys", start: 8, end: 8.8}
+          - {text: "rose", start: 9, end: 9.8}
+          - {text: "might", start: 10, end: 10.8}
+          - {text: "never", start: 11, end: 11.8}
+          - {text: "die", start: 12, end: 12.8}
+        duration: 20
+        want:
+          - {word: 1, start: 1}
+          - {word: 8, start: 8}
+
+      - name: "words the recogniser dropped are spread across the gap they left"
+        why: >
+          Everything between "From" and "increase" goes missing. The four dropped
+          words share the space instead of piling up on one instant, which is where
+          none of them could be found.
+        expected:
+          ["From", "fairest", "creatures", "we", "desire", "increase",
+           "That", "thereby", "beauty’s", "rose", "might", "never", "die"]
+        heard:
+          - {text: "from", start: 0, end: 0.5}
+          - {text: "increase", start: 6, end: 6.5}
+        duration: 20
+        want:
+          - {word: 0, start: 0}
+          - {word: 5, start: 6}
+          - {word: 1, start_at_least: 0.5}
+          - {word: 4, end_at_most: 6.001}
+        strictly_increasing: [1, 5]
+
+      - name: "a word the reader never said does not steal a match"
+        why: >
+          An "um" between two words costs less to pass over than to pair with one of
+          them, so it does not push a written word off its own time.
+        expected:
+          ["From", "fairest", "creatures", "we", "desire", "increase",
+           "That", "thereby", "beauty’s", "rose", "might", "never", "die"]
+        heard:
+          - {text: "from", start: 0, end: 0.8}
+          - {text: "fairest", start: 1, end: 1.8}
+          - {text: "creatures", start: 2, end: 2.8}
+          - {text: "um", start: 3, end: 3.8}
+          - {text: "we", start: 4, end: 4.8}
+          - {text: "desire", start: 5, end: 5.8}
+          - {text: "increase", start: 6, end: 6.8}
+          - {text: "that", start: 7, end: 7.8}
+          - {text: "thereby", start: 8, end: 8.8}
+          - {text: "beauty’s", start: 9, end: 9.8}
+          - {text: "rose", start: 10, end: 10.8}
+          - {text: "might", start: 11, end: 11.8}
+          - {text: "never", start: 12, end: 12.8}
+          - {text: "die", start: 13, end: 13.8}
+        duration: 20
+        want: []
+
+  - section: "Nothing heard at all"
+    cases:
+      - name: "nothing heard at all yields nothing rather than a guess"
+        expected: ["From", "fairest", "creatures"]
+        heard: []
+        duration: 20
+        want_empty: true
