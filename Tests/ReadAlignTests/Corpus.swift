@@ -37,6 +37,10 @@ struct SpanExpectation: Codable {
         case endAtLeast = "end_at_least"
         case endAtMost = "end_at_most"
     }
+
+    var pinsSomething: Bool {
+        start != nil || end != nil || startAtLeast != nil || endAtLeast != nil || endAtMost != nil
+    }
 }
 
 struct UnusableWeighting: SpeechWeighting {
@@ -60,6 +64,7 @@ enum WeightingName: String, Codable {
 extension WordSpan {
     func check(against expectation: SpanExpectation, in name: String) {
         let subject = "\(name), word \(expectation.word)"
+        #expect(expectation.pinsSomething, "\(subject): pins nothing, so a key here is misspelt")
         if let start = expectation.start {
             #expect(abs(self.start - start) < Corpus.tolerance, "\(subject): start")
         }

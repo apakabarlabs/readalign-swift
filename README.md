@@ -137,7 +137,12 @@ A case pins what it was written to pin and nothing else: `want` lists spans by w
 
 Each case carries a `why`, which is where the reason for it lives.
 
-The corpus is checked by mutation: changing the join bar, the match bar, the skip price, the silent-`e` rule, either empty-token guard, the choice of which neighbour swallowed a run, or the patch mechanism must turn it red. The mismatch price is the one constant it does not hold, and cannot: as described above, its size does not reach the result.
+The corpus is checked by mutation: changing any value in `rules.yaml` must turn it red, and so must removing either empty-token guard, changing which neighbour a swallowed run takes its room from, or ignoring the patch mechanism.
+
+Two things it does not hold, and cannot, because neither reaches the result:
+
+- **The exact price of a bad pair, and of a skip.** As described above, a pair below its bar is never recorded whatever path the table took, so only the ordering matters — two skips have to be worth more than one bad pair. Set them far enough apart to break that ordering and the corpus does go red; move either a little and nothing changes, because nothing can.
+- **Widening how far a join may reach.** The join bar rejects the extra material anyway, so a larger `join_span` only permits joins that were already alike enough. Narrowing it is held.
 
 ## Install
 

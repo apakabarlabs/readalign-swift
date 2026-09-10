@@ -28,7 +28,7 @@ struct Alignment {
     }
 
     func spans(forExpectedAt row: Int) -> Int {
-        max(2, printedParts[row])
+        max(Rules.shared.joinSpan, printedParts[row])
     }
 
     func joinedExpected(_ row: Int, _ column: Int) -> Double {

@@ -21,10 +21,14 @@ public struct EnglishSyllableWeighting: SpeechWeighting {
             if isVowel && !previousWasVowel { count += 1 }
             previousWasVowel = isVowel
         }
-        if letters.count > 2, letters.hasSuffix("e"), !letters.hasSuffix("le"), count > 1 {
+        let spelled = String(letters)
+        if letters.count >= Rules.shared.shortestWithASilentEnding,
+           spelled.hasSuffix(Rules.shared.silentEnding),
+           !spelled.hasSuffix(Rules.shared.silentEndingExceptAfter),
+           count > 1 {
             count -= 1
         }
-        return max(count, 1)
+        return max(count, Int(Rules.shared.lightestWord))
     }
 }
 

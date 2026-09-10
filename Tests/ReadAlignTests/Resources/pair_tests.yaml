@@ -136,6 +136,19 @@ tests:
           - expected: [2, 3]
             heard: [2, 5]
 
+      - name: "a word print writes as one is still allowed to be heard as two"
+        why: >
+          Print says how many parts a hyphenated compound has, but an ordinary word
+          has no hyphens to count and a recogniser splits a long one wherever it
+          likes. Without a floor under how far a join may reach, "everywhere" heard
+          as "every where" is not the word at all.
+        expected: ["and", "bareness", "everywhere"]
+        heard: ["and", "bareness", "every", "where"]
+        threshold: 0.6
+        want:
+          - expected: [2, 3]
+            heard: [2, 4]
+
       - name: "a compound of two parts matches the two words it is heard as"
         expected: ["and", "swift-footed", "time"]
         heard: ["and", "swift", "footed", "time"]

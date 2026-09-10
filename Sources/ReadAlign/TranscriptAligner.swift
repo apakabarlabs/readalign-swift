@@ -177,7 +177,8 @@ public enum TranscriptAligner {
 
     private static func speechWeight(of word: String, using weighting: any SpeechWeighting) -> Double {
         let weight = weighting.weight(of: word)
-        return weight.isFinite ? max(weight, 1) : 1
+        let lightest = Rules.shared.lightestWord
+        return weight.isFinite ? max(weight, lightest) : lightest
     }
 
     public static func normalize(_ word: String) -> String {
@@ -189,7 +190,9 @@ public enum TranscriptAligner {
     }
 
     public static func fold(_ word: String) -> String {
-        let lifted = word.folding(options: .diacriticInsensitive, locale: nil)
+        let scalars = word.decomposedStringWithCanonicalMapping.unicodeScalars
+            .filter { !Rules.shared.lifts($0) }
+        let lifted = String(String.UnicodeScalarView(scalars)).precomposedStringWithCanonicalMapping
         return String(lifted.map { character in
             Rules.shared.foldedLetters[String(character)].flatMap(\.first) ?? character
         })

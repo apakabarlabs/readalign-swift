@@ -1,7 +1,8 @@
 # The numbers the alignment is tuned to. Shared by every port of this library, so
 # that changing one changes all of them rather than leaving them quietly apart.
 #
-# What each is for is written up in the README, under "How it works".
+# What each is for is written up in the README of the Swift library, under
+# "How it works". This file is copied into every port, so that is where it stays.
 
 # How alike two words must be to count as the same word.
 match_threshold: 0.6
@@ -19,13 +20,39 @@ mismatch_penalty: -1.5
 # Shorter than this and a word has no stretch of the recording to be found at.
 room_enough: 0.04
 
+# How many heard words one written word may be spread over when print says
+# nothing: a compound gives its own count, anything else may still take a pair,
+# since a recogniser splits a long word wherever it likes.
+join_span: 2
+
 # Letters that open a syllable for the English weighting.
 english_vowels: "aeiouy"
 
+# The silent final "e" of English, which closes no syllable of its own -- except
+# after "l", or "little" comes out as one syllable. A word shorter than this
+# has no syllable to spare.
+silent_ending: "e"
+silent_ending_except_after: "le"
+shortest_with_a_silent_ending: 3
+
+# No word weighs less than this, whoever wrote the weighting, or a run of them
+# shares a pause by dividing by nothing.
+lightest_word: 1
+
 # Likeness is measured with the marks taken off, because a recogniser trained on
-# plain Latin returns "casa" for "čaša" and the word is still the word. Unicode
-# takes off a mark that sits above a letter; these carry theirs through the letter
-# itself, so it has nothing to lift and they are listed instead.
+# plain Latin returns "casa" for "čaša" and the word is still the word.
+#
+# Which marks come off is named here rather than left to whatever each language
+# calls a diacritic: those tables disagree, and a port would answer differently
+# from its sibling on whole writing systems. This range is the Latin combining
+# diacritics and nothing else. A voiced-sound mark on Japanese kana and a vowel
+# sign in Devanagari are combining marks too, and lifting them would turn one word
+# into a different one: さ is not ざ.
+lifted_marks_from: "0300"
+lifted_marks_to: "036F"
+
+# Letters that carry their mark through the letter itself, so there is nothing
+# above them to lift.
 folded_letters:
   "ł": "l"
   "đ": "d"

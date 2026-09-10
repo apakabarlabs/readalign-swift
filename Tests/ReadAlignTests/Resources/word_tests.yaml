@@ -62,6 +62,27 @@ similarity:
   - left: "kuća"
     right: "muža"
     at_most: 0.6
+  # A mark that is not a decoration on a letter stays. Every one of these is a
+  # combining mark to Unicode, and a port that lifts whatever its own language
+  # calls a diacritic answers "the same word" to all four.
+  - left: "ざる"
+    right: "さる"
+    at_most: 0.6
+  - left: "가나"
+    right: "가다"
+    at_most: 0.6
+  - left: "नमस्ते"
+    right: "नमसते"
+    at_most: 0.6
+  - left: "สวัสดี"
+    right: "สวสด"
+    at_most: 0.6
+  # Counted in letters as a reader sees them, not in the pieces a letter is
+  # stored as: by pieces these two are three edits apart out of six and would
+  # pass, by letters they are two out of three and do not.
+  - left: "नमस्ते"
+    right: "नमस्त"
+    at_most: 0.7
   - left: "beautys"
     right: "beautys"
     equals: 1.0
