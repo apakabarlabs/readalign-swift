@@ -74,3 +74,11 @@ quietest_room: 0.0001
 
 # How far past its own mark a word may be held.
 hold_limit: 0.6
+
+# How loud this recording speaks, taken as the mean of its loudest share. Speech
+# occupies rather more than half of a reading, so half lands inside the voice
+# rather than on its peaks, and one reader recorded hotter than another is
+# measured against themselves. A recording with nothing in it still has to answer
+# something above zero, or everything measured against it is divided by nothing.
+speech_from_loudest_share: 0.5
+quietest_speech: 0.000001

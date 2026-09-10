@@ -17,16 +17,13 @@ public struct Rules: Codable, Sendable {
     public let liftedMarksTo: String
     public let foldedLetters: [String: String]
 
-    public func lifts(_ scalar: Unicode.Scalar) -> Bool {
-        guard let first = UInt32(liftedMarksFrom, radix: 16),
-              let last = UInt32(liftedMarksTo, radix: 16) else { return false }
-        return (first...last).contains(scalar.value)
-    }
     public let frameSeconds: TimeInterval
     public let roomQuantile: Double
     public let speechAboveRoom: Double
     public let quietestRoom: Double
     public let holdLimit: TimeInterval
+    public let speechFromLoudestShare: Double
+    public let quietestSpeech: Double
 
     enum CodingKeys: String, CodingKey {
         case matchThreshold = "match_threshold"
@@ -48,7 +45,18 @@ public struct Rules: Codable, Sendable {
         case speechAboveRoom = "speech_above_room"
         case quietestRoom = "quietest_room"
         case holdLimit = "hold_limit"
+        case speechFromLoudestShare = "speech_from_loudest_share"
+        case quietestSpeech = "quietest_speech"
     }
 
     public static let shared: Rules = Embedded.getYAML(Bundle.module, path: "rules.yaml")
+
+    /// The marks are written the way Unicode writes them, so they are read that way.
+    private static let hexadecimal = 16
+
+    public func lifts(_ scalar: Unicode.Scalar) -> Bool {
+        guard let first = UInt32(liftedMarksFrom, radix: Self.hexadecimal),
+              let last = UInt32(liftedMarksTo, radix: Self.hexadecimal) else { return false }
+        return (first...last).contains(scalar.value)
+    }
 }

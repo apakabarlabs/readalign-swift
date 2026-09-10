@@ -10,15 +10,16 @@ public struct EnglishSyllableWeighting: SpeechWeighting {
     }
 
     public func syllableCount(of word: String) -> Int {
+        let lightest = Int(Rules.shared.lightestWord)
         let vowels = Set(Rules.shared.englishVowels)
-        let letters = word.lowercased().filter { $0.isLetter }
-        guard !letters.isEmpty else { return 1 }
+        let letters = word.lowercased().filter(\.isLetter)
+        guard !letters.isEmpty else { return lightest }
 
         var count = 0
         var previousWasVowel = false
         for letter in letters {
             let isVowel = vowels.contains(letter)
-            if isVowel && !previousWasVowel { count += 1 }
+            if isVowel, !previousWasVowel { count += 1 }
             previousWasVowel = isVowel
         }
         let spelled = String(letters)
@@ -28,12 +29,12 @@ public struct EnglishSyllableWeighting: SpeechWeighting {
            count > 1 {
             count -= 1
         }
-        return max(count, Int(Rules.shared.lightestWord))
+        return max(count, lightest)
     }
 }
 
 public struct EvenWeighting: SpeechWeighting {
     public init() {}
 
-    public func weight(of word: String) -> Double { 1 }
+    public func weight(of _: String) -> Double { 1 }
 }

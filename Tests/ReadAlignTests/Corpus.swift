@@ -44,7 +44,7 @@ struct SpanExpectation: Codable {
 }
 
 struct UnusableWeighting: SpeechWeighting {
-    func weight(of word: String) -> Double { .nan }
+    func weight(of _: String) -> Double { .nan }
 }
 
 enum WeightingName: String, Codable {

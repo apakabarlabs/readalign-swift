@@ -46,14 +46,57 @@ struct HoldSection: Codable {
     let cases: [HoldCase]
 }
 
+struct SpeechLevelCase: Codable, CustomTestStringConvertible {
+    let name: String
+    let sampleRate: Double
+    let waveform: [Stretch]
+    let equals: Double?
+    let atLeast: Double?
+
+    enum CodingKeys: String, CodingKey {
+        case name, waveform, equals
+        case sampleRate = "sample_rate"
+        case atLeast = "at_least"
+    }
+
+    var testDescription: String { name }
+
+    var samples: [Float] {
+        waveform.flatMap { stretch in
+            [Float](repeating: stretch.level, count: Int((stretch.seconds * sampleRate).rounded()))
+        }
+    }
+}
+
 struct HoldFile: Codable {
+    let speechLevel: [SpeechLevelCase]
     let tests: [HoldSection]
+
+    enum CodingKeys: String, CodingKey {
+        case tests
+        case speechLevel = "speech_level"
+    }
 }
 
 struct HoldTests {
-    static let cases: [HoldCase] = Corpus.load("hold_tests.yaml", as: HoldFile.self)
-        .tests
-        .flatMap(\.cases)
+    static let file: HoldFile = Corpus.load("hold_tests.yaml", as: HoldFile.self)
+    static let cases: [HoldCase] = file.tests.flatMap(\.cases)
+
+    @Test(arguments: file.speechLevel)
+    func measuresHowLoudlyTheRecordingSpeaks(levelCase: SpeechLevelCase) {
+        #expect(levelCase.equals != nil || levelCase.atLeast != nil, "\(levelCase.name): pins nothing")
+
+        let level = SilenceHold.speechLevel(
+            of: SilenceHold.energyFrames(of: levelCase.samples, sampleRate: levelCase.sampleRate)
+        )
+
+        if let exact = levelCase.equals {
+            #expect(abs(level - exact) < Corpus.tolerance, "\(levelCase.name): \(level)")
+        }
+        if let floor = levelCase.atLeast {
+            #expect(level >= floor, "\(levelCase.name): \(level)")
+        }
+    }
 
     @Test(arguments: cases)
     func holdsAsTheCorpusSays(holdCase: HoldCase) {

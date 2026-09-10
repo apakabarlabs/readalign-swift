@@ -6,6 +6,45 @@ excluded:
   - .build
   - Package.swift
 
+opt_in_rules: all
+
 analyzer_rules:
   - unused_import
   - unused_declaration
+
+disabled_rules:
+  # Wants the opening brace on a line of its own, which is neither how Swift is
+  # written nor what the default `opening_brace` rule asks for. The two cannot
+  # both be satisfied.
+  - contrasted_opening_brace
+  # Want `internal` spelled out on everything that is already internal by default,
+  # and a raw value on every enum case that does not need one.
+  - explicit_acl
+  - explicit_top_level_acl
+  - explicit_enum_raw_value
+  # Wants a type written on every property, which is what inference is for.
+  - explicit_type_interface
+  # Orderings of declarations within a type and of types within a file. A file
+  # here holds the few types one subject needs, in the order it reads in.
+  - type_contents_order
+  - file_types_order
+  - one_declaration_per_file
+  # A docstring on everything public is a second place for a fact the name and the
+  # structure already carry, and it goes stale where the code does not.
+  - missing_docs
+  # Line breaks before a return and after a case label.
+  - conditional_returns_on_newline
+  - switch_case_on_newline
+  # Wants `@testable import` sorted among the others by module name, which puts it
+  # in the middle. Every Swift project puts it last, and so does this one.
+  - sorted_imports
+  # A protocol requirement and a public `init()` are empty because the language
+  # says so, not because something is missing from them.
+  - no_empty_block
+  # An absent key in the shared case files has to be told apart from a key that is
+  # there and says nothing, and optional is how that is spelled.
+  - discouraged_optional_collection
+  - discouraged_optional_boolean
+  # A default argument is part of this library's interface: the English weighting
+  # and the standing hold limit are what a caller gets by asking for neither.
+  - discouraged_default_parameter

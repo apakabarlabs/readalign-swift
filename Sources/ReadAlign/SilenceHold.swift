@@ -10,7 +10,7 @@ public enum SilenceHold {
         let frames = energyFrames(of: samples, sampleRate: sampleRate)
         guard !frames.isEmpty else { return spans }
         let threshold = speechThreshold(of: frames)
-        let frameSeconds = Rules.shared.frameSeconds
+        let eachFrame = Rules.shared.frameSeconds
         let duration = Double(samples.count) / sampleRate
 
         return spans.indices.map { index in
@@ -18,15 +18,15 @@ public enum SilenceHold {
             let next = index + 1 < spans.count ? spans[index + 1].start : duration
             let ceiling = min(next, span.end + limit)
             var end = span.end
-            var frame = Int(span.end / frameSeconds)
+            var frame = Int(span.end / eachFrame)
             var wentQuiet = false
-            while Double(frame + 1) * frameSeconds <= ceiling, frame < frames.count {
+            while Double(frame + 1) * eachFrame <= ceiling, frame < frames.count {
                 if frames[frame] < threshold {
                     wentQuiet = true
                 } else if wentQuiet {
                     break
                 }
-                end = Double(frame + 1) * frameSeconds
+                end = Double(frame + 1) * eachFrame
                 frame += 1
             }
             return WordSpan(
@@ -55,9 +55,10 @@ public enum SilenceHold {
     }
 
     public static func speechLevel(of frames: [Double]) -> Double {
-        let sorted = frames.sorted()
-        let louder = sorted[(sorted.count / 2)...]
+        guard !frames.isEmpty else { return Rules.shared.quietestSpeech }
+        let quieter = Int(Double(frames.count) * (1 - Rules.shared.speechFromLoudestShare))
+        let louder = frames.sorted()[quieter...]
         let mean = louder.reduce(0, +) / Double(louder.count)
-        return max(mean, 1e-6)
+        return max(mean, Rules.shared.quietestSpeech)
     }
 }

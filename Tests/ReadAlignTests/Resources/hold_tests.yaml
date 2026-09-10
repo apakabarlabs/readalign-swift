@@ -9,6 +9,29 @@
 # finished with it. The release of a final consonant and the fall of a line land
 # beyond the mark, so a passage played to the last word's mark stops a hair early,
 # every time, and is heard as a fault in the recording.
+# How loud a recording speaks, which is what a caller measures a boundary against
+# when it wants to know whether a moment is inside the voice or behind it.
+speech_level:
+  - name: "the mean of the loudest half, not the peak and not the room"
+    sample_rate: 1000
+    waveform:
+      - {level: 0.8, seconds: 0.05}
+      - {level: 0.4, seconds: 0.05}
+      - {level: 0.0, seconds: 0.10}
+    equals: 0.6
+  - name: "a recording with nothing in it still answers above nothing"
+    sample_rate: 1000
+    waveform:
+      - {level: 0.0, seconds: 0.10}
+    at_least: 0.0000001
+  - name: "one reader recorded hotter than another is measured against themselves"
+    sample_rate: 1000
+    waveform:
+      - {level: 0.08, seconds: 0.05}
+      - {level: 0.04, seconds: 0.05}
+      - {level: 0.0, seconds: 0.10}
+    equals: 0.06
+
 tests:
   - section: "A word held to the quiet behind it"
     cases:

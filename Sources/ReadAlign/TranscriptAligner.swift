@@ -150,7 +150,7 @@ public enum TranscriptAligner {
             }
             index = runEnd
         }
-        return timings.compactMap { $0 }
+        return timings.compactMap(\.self)
     }
 
     private static let roomEnough = Rules.shared.roomEnough
@@ -182,7 +182,7 @@ public enum TranscriptAligner {
     }
 
     public static func normalize(_ word: String) -> String {
-        word.lowercased().filter { $0.isLetter }
+        word.lowercased().filter(\.isLetter)
     }
 
     static func printedParts(_ word: String) -> Int {
@@ -199,11 +199,12 @@ public enum TranscriptAligner {
     }
 
     static func similarity(_ left: String, _ right: String) -> Double {
-        let (left, right) = (fold(left), fold(right))
-        if left == right { return 1 }
-        if left.isEmpty || right.isEmpty { return 0 }
-        let distance = editDistance(Array(left), Array(right))
-        return 1 - Double(distance) / Double(max(left.count, right.count))
+        let written = fold(left)
+        let said = fold(right)
+        if written == said { return 1 }
+        if written.isEmpty || said.isEmpty { return 0 }
+        let distance = editDistance(Array(written), Array(said))
+        return 1 - Double(distance) / Double(max(written.count, said.count))
     }
 
     private static func editDistance(_ left: [Character], _ right: [Character]) -> Int {

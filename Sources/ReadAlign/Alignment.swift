@@ -1,4 +1,9 @@
 struct Alignment {
+    /// Two rows or columns of the table, which is what a join looks back at. Not a
+    /// tuned value: a pair is two by arithmetic. How far a join may reach on the
+    /// heard side is `join_span` in the rules.
+    static let pair = 2
+
     let expected: [String]
     let heard: [String]
     let threshold: Double
@@ -34,7 +39,7 @@ struct Alignment {
     func joinedExpected(_ row: Int, _ column: Int) -> Double {
         guard joinable(expected[(row - 1)...row]), !heard[column].isEmpty else { return mismatchPenalty }
         let joined = expected[row - 1] + expected[row]
-        if equivalent?(joined, heard[column], row > 1 ? expected[row - 2] : nil) == true { return 1 }
+        if equivalent?(joined, heard[column], row > 1 ? expected[row - Self.pair] : nil) == true { return 1 }
         return worth(TranscriptAligner.similarity(joined, heard[column]), against: joinThreshold)
     }
 
@@ -44,7 +49,7 @@ struct Alignment {
         }
         let written = expected[row - 1] + expected[row]
         let said = heard[column - 1] + heard[column]
-        if equivalent?(written, said, row > 1 ? expected[row - 2] : nil) == true { return 1 }
+        if equivalent?(written, said, row > 1 ? expected[row - Self.pair] : nil) == true { return 1 }
         return worth(TranscriptAligner.similarity(written, said), against: joinThreshold)
     }
 
@@ -68,17 +73,19 @@ struct Alignment {
                 var best = score[row - 1][column - 1] + straight(row - 1, column - 1)
                 best = max(best, score[row - 1][column] + gapPenalty)
                 best = max(best, score[row][column - 1] + gapPenalty)
-                for span in 2...spans(forExpectedAt: row - 1) where column >= span {
+                for span in Self.pair...spans(forExpectedAt: row - 1) where column >= span {
                     best = max(
                         best,
                         score[row - 1][column - span] + joinedHeard(row - 1, column - 1, span: span)
                     )
                 }
-                if row >= 2 {
-                    best = max(best, score[row - 2][column - 1] + joinedExpected(row - 1, column - 1))
+                if row >= Self.pair {
+                    let reached = score[row - Self.pair][column - 1]
+                    best = max(best, reached + joinedExpected(row - 1, column - 1))
                 }
-                if row >= 2, column >= 2 {
-                    best = max(best, score[row - 2][column - 2] + joinedPair(row - 1, column - 1))
+                if row >= Self.pair, column >= Self.pair {
+                    let reached = score[row - Self.pair][column - Self.pair]
+                    best = max(best, reached + joinedPair(row - 1, column - 1))
                 }
                 score[row][column] = best
             }
@@ -99,7 +106,7 @@ struct Alignment {
                 }
                 row -= 1
                 column -= 1
-            } else if let span = (2...spans(forExpectedAt: row - 1)).first(where: { span in
+            } else if let span = (Self.pair...spans(forExpectedAt: row - 1)).first(where: { span in
                 column >= span
                     && cell == score[row - 1][column - span] + joinedHeard(row - 1, column - 1, span: span)
             }) {
@@ -108,18 +115,21 @@ struct Alignment {
                 }
                 row -= 1
                 column -= span
-            } else if row >= 2, column >= 2,
-                      cell == score[row - 2][column - 2] + joinedPair(row - 1, column - 1) {
+            } else if row >= Self.pair, column >= Self.pair,
+                      cell == score[row - Self.pair][column - Self.pair] + joinedPair(row - 1, column - 1) {
                 if joinedPair(row - 1, column - 1) >= joinThreshold {
-                    matches.append(WordMatch(expected: (row - 2)..<row, heard: (column - 2)..<column))
+                    let back = (row - Self.pair)..<row
+                    matches.append(WordMatch(expected: back, heard: (column - Self.pair)..<column))
                 }
-                row -= 2
-                column -= 2
-            } else if row >= 2, cell == score[row - 2][column - 1] + joinedExpected(row - 1, column - 1) {
+                row -= Self.pair
+                column -= Self.pair
+            } else if row >= Self.pair,
+                      cell == score[row - Self.pair][column - 1] + joinedExpected(row - 1, column - 1) {
                 if joinedExpected(row - 1, column - 1) >= joinThreshold {
-                    matches.append(WordMatch(expected: (row - 2)..<row, heard: (column - 1)..<column))
+                    let back = (row - Self.pair)..<row
+                    matches.append(WordMatch(expected: back, heard: (column - 1)..<column))
                 }
-                row -= 2
+                row -= Self.pair
                 column -= 1
             } else if cell == score[row - 1][column] + gapPenalty {
                 row -= 1
