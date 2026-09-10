@@ -26,6 +26,7 @@ struct SpanExpectation: Codable {
     let start: TimeInterval?
     let end: TimeInterval?
     let startAtLeast: TimeInterval?
+    let endAtLeast: TimeInterval?
     let endAtMost: TimeInterval?
 
     enum CodingKeys: String, CodingKey {
@@ -33,18 +34,25 @@ struct SpanExpectation: Codable {
         case start
         case end
         case startAtLeast = "start_at_least"
+        case endAtLeast = "end_at_least"
         case endAtMost = "end_at_most"
     }
+}
+
+struct UnusableWeighting: SpeechWeighting {
+    func weight(of word: String) -> Double { .nan }
 }
 
 enum WeightingName: String, Codable {
     case english
     case even
+    case unusable
 
     var weighting: any SpeechWeighting {
         switch self {
         case .english: EnglishSyllableWeighting()
         case .even: EvenWeighting()
+        case .unusable: UnusableWeighting()
         }
     }
 }
@@ -60,6 +68,9 @@ extension WordSpan {
         }
         if let floor = expectation.startAtLeast {
             #expect(self.start >= floor - Corpus.tolerance, "\(subject): start at least")
+        }
+        if let floor = expectation.endAtLeast {
+            #expect(self.end >= floor - Corpus.tolerance, "\(subject): end at least")
         }
         if let ceiling = expectation.endAtMost {
             #expect(self.end <= ceiling + Corpus.tolerance, "\(subject): end at most")

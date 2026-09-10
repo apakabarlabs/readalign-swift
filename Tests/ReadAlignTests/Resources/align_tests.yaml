@@ -123,6 +123,32 @@ tests:
           - {word: 0, start: 0, end: 1}
           - {word: 1, start: 1, end: 10}
 
+      - name: "a word that merely rhymes with the written one is not it"
+        why: >
+          "kerb" and "curb" are the same sound and half the same letters, which is
+          well under the bar and has to stay there: the bar is what separates a word
+          spelled its own way from a different word standing in the same place.
+        expected: ["kerb"]
+        heard:
+          - {text: "curb", start: 5, end: 6}
+        duration: 10
+        want:
+          - {word: 0, start: 0, end: 10}
+
+      - name: "passing two words over costs less than pairing them badly"
+        why: >
+          The whole reason a skip is priced below a bad pair. Priced the other way
+          round, the alignment would rather put "house" opposite "zzz" than leave
+          both alone, and would then have no heard word left for "home" -- which is
+          in the recording, at its own second, and would lose it.
+        expected: ["house", "home"]
+        heard:
+          - {text: "zzz", start: 0, end: 1}
+          - {text: "home", start: 5, end: 6}
+        duration: 8
+        want:
+          - {word: 1, start: 5, end: 6}
+
       - name: "a word too unlike the one written does not take its time"
         why: >
           Below the bar, a pairing is worse than passing both words over. Otherwise

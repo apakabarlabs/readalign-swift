@@ -4,7 +4,33 @@
 # identical and 0 for nothing in common; a case pins it with `equals`, `at_least`
 # or `at_most`, because most of what matters about it is which side of a bar it
 # falls on rather than its exact value.
+# How many words print writes one word as, which is the ceiling on how many heard
+# words it may be spread over. Marks at the edges and doubled marks are not parts.
+printed_parts:
+  - word: "word"
+    parts: 1
+  - word: "swift-footed"
+    parts: 2
+  - word: "world-without-end"
+    parts: 3
+  - word: "well-to-do-"
+    parts: 3
+  - word: "over--seas"
+    parts: 2
+  - word: "-"
+    parts: 1
+
 normalize:
+  # A letter and the mark above it are one letter, however the text spells them.
+  # The same word typed one way and pasted another must compare the same, or a
+  # reading loaded from a file disagrees with the same reading typed by hand.
+  - word: "Ångström"
+    want: "ångström"
+  - word: "Ångström"
+    want: "ångström"
+  # A roman numeral is read aloud as a word and counts as one.
+  - word: "Ⅻ"
+    want: "ⅻ"
   - word: "beauty’s"
     want: "beautys"
   - word: "Feed'st"
@@ -60,6 +86,11 @@ english_syllables:
     count: 3
   - word: "self-substantial"
     at_least: 4
+  # A letter carrying a mark is one letter, and it is not a vowel of ours: counted
+  # by code point instead, the dotted capital I of Turkish reads as a plain "i" and
+  # the word gains a syllable it does not have.
+  - word: "İstanbul"
+    count: 2
   # The silent final "e" is the whole reason the count is not just vowel groups:
   # without the rule "rose" reads as two syllables and takes twice the airtime.
   - word: "stone"

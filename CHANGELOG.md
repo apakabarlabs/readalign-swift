@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.2.0
+
+A Python port of this library now exists, and the two are held to one set of tuned numbers and one set of cases so they cannot come to disagree. Both carry the same major and minor version for that reason.
+
+### Added
+- `SilenceHold.held` carries each word's mark into the quiet behind it, and never into the word that follows. A recogniser marks where a word stops being audible, not where the voice has finished with it, so a passage played to the mark stops a hair short of itself. It is the one call that needs the recording.
+
+### Changed
+- Likeness is measured with diacritical marks lifted. A recogniser trained on plain Latin returns `casa` for `čaša` and `lodz` for `łódź`, and in a short word two lost marks put it under any usable bar: the word was not found at all, and the stretch it was given ran between its neighbours, so a mark following the reading sat on a word nobody was saying. `normalize` is unchanged, so a reader saying `zamek` for `żamek` is still not credited with it — lifting the marks is for finding where a word is, not for deciding whether it was said.
+- The numbers the alignment is tuned to moved out of the source into `rules.yaml`, which every port reads.
+
+### Fixed
+- A token with no letters in it — a numeral, a stray mark — was joined onto its neighbour for free, because it adds nothing to the joined string and so cannot lower the likeness. `From 1999 fairest` gave `From` everything up to `fairest`. Such a token is now passed over.
+- A weighting answering with something that is not a number travelled through `max` into every span. It is read as one instead.
+
 ## 0.1.0
 
 First release. Nothing to migrate from.

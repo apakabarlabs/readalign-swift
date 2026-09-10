@@ -30,6 +30,57 @@ tests:
           - {word: 0, end: 0.25}
           - {word: 1, end: 0.55}
 
+      - name: "the last word is held no further than the standing limit"
+        why: >
+          Nothing follows it and the recording is quiet to the end, so the only
+          thing that can stop the hold is the limit the rules carry. Without one a
+          word would be shown as sounding through however much silence the file
+          happens to end with.
+        sample_rate: 1000
+        waveform:
+          - {level: 0.5, seconds: 0.10}
+          - {level: 0.0, seconds: 2.00}
+        spans:
+          - {start: 0.00, end: 0.10}
+        want:
+          - {word: 0, end_at_least: 0.60, end_at_most: 0.71}
+
+      - name: "the limit stops the hold before the word that follows does"
+        why: >
+          Two words far apart with quiet between them. The next word is a long way
+          off, so it is the limit that has to stop the hold; without it the first
+          word would be carried most of the way to the second and be shown as
+          sounding through a pause it does not fill.
+        sample_rate: 1000
+        limit: 0.2
+        waveform:
+          - {level: 0.5, seconds: 0.10}
+          - {level: 0.0, seconds: 1.40}
+          - {level: 0.5, seconds: 0.10}
+        spans:
+          - {start: 0.00, end: 0.10}
+          - {start: 1.50, end: 1.60}
+        want:
+          - {word: 0, end: 0.30}
+
+      - name: "the room a recording was made in counts as quiet"
+        why: >
+          A real recording is never silent between words: there is a room behind
+          the voice. The quiet is taken from the recording itself and speech is what
+          stands well clear of it, so the room reads as a pause and the hold stops
+          where the voice comes back. Measured against the room exactly, the room
+          itself would read as speech, the pause would never register, and the word
+          would be carried straight through the word after it.
+        sample_rate: 1000
+        waveform:
+          - {level: 0.5, seconds: 0.10}
+          - {level: 0.02, seconds: 0.30}
+          - {level: 0.5, seconds: 0.10}
+        spans:
+          - {start: 0.00, end: 0.10}
+        want:
+          - {word: 0, end_at_least: 0.30, end_at_most: 0.41}
+
       - name: "a recording with nothing in it leaves the marks alone"
         why: >
           Nothing to measure a room against, so nothing is moved rather than

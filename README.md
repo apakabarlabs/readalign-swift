@@ -8,6 +8,7 @@ This is not transcription. The words are known in advance; the recogniser is onl
 ## What it handles
 
 - **A misheard word.** `stowage` comes back as `stoage`, `harbour` as `harbor`. Matched on similarity, so the word keeps its own time.
+- **A word the recogniser wrote without its diacritics.** `čaša` comes back as `casa`, `łódź` as `lodz`. Likeness is measured with the marks lifted, or a short word in a language that uses them would not be found at all.
 - **A word boundary in the wrong place.** `shouldst owe` comes back as `should stow`: the same sound, the gap moved one consonant cluster. Matched as a pair, on a stricter bar than a single word.
 - **One written word heard as several.** A hyphenated compound says how many parts it has, and the whole of what was heard is timed across all of them.
 - **Several written words heard as one.** `every where` comes back as `everywhere`; the stretch is shared out between them by speech weight rather than given to both.
@@ -58,6 +59,10 @@ let matches = TranscriptAligner.pair(
 The predecessor comes along because such a patch is often confined to one turn of phrase, and only the alignment knows what stands where.
 
 It is asked with either side joined up as well, because a recogniser writes a hyphenated compound as two words and two written words as one, and both are one entry in a patch table. Without the joined-written question a model that runs two words together is unpatchable: `in sense` comes back `incense`, which is what those two words sound like said in a row, and similarity alone will not carry it over the join bar. Narrowing the patch entry to the second word instead does not work, since the one heard word is then spent on it and the first has nothing left to match.
+
+### Holding a word open through the silence after it
+
+The one call that needs the recording. A recogniser marks where a word stops being audible, not where the voice has finished with it, so a passage played to the mark stops a hair short of itself. Give `SilenceHold.held` the samples and the marks come back carried into the quiet, and never into the word that follows.
 
 ### Other languages
 
@@ -122,7 +127,9 @@ The same sharing happens inside a single match when several written words were h
 
 Two things live as data rather than as code, so that a port in another language reads them instead of holding its own copy.
 
-`Sources/ReadAlign/Resources/rules.yaml` holds the numbers the alignment is tuned to: the two bars, the price of a gap and of a bad pair, the shortest span a word can be found at, and the letters the English weighting counts as vowels. Changing one of them changes every port, rather than leaving them quietly apart.
+`Sources/ReadAlign/Resources/rules.yaml` holds every number the alignment is tuned to: the two bars, the price of a gap and of a bad pair, the shortest span a word can be found at, the letters the English weighting counts as vowels, the letters that carry their mark through the letter itself, and the five that decide how a word is held through the silence after it. Changing one of them changes every port, rather than leaving them quietly apart.
+
+There is a Python port at [readalign-python](https://github.com/apakabarlabs/readalign-python), which syncs both files from here. The two carry the same major and minor version, so equal numbers mean equal behaviour.
 
 The cases live in YAML under `Tests/ReadAlignTests/Resources/`, one file per function, and every port is held to the same ones. What stays in Swift is only the runner.
 

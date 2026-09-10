@@ -38,19 +38,33 @@ struct SyllableCase: Codable, CustomTestStringConvertible {
     var testDescription: String { word }
 }
 
+struct PrintedPartsCase: Codable, CustomTestStringConvertible {
+    let word: String
+    let parts: Int
+
+    var testDescription: String { "\(word) -> \(parts)" }
+}
+
 struct WordFile: Codable {
+    let printedParts: [PrintedPartsCase]
     let normalize: [NormalizeCase]
     let similarity: [SimilarityCase]
     let englishSyllables: [SyllableCase]
 
     enum CodingKeys: String, CodingKey {
         case normalize, similarity
+        case printedParts = "printed_parts"
         case englishSyllables = "english_syllables"
     }
 }
 
 struct WordTests {
     static let file: WordFile = Corpus.load("word_tests.yaml", as: WordFile.self)
+
+    @Test(arguments: file.printedParts)
+    func countsPrintedPartsAsTheCorpusSays(partsCase: PrintedPartsCase) {
+        #expect(TranscriptAligner.printedParts(partsCase.word) == partsCase.parts, "\(partsCase.word)")
+    }
 
     @Test(arguments: file.normalize)
     func normalizesAsTheCorpusSays(normalizeCase: NormalizeCase) {
