@@ -26,6 +26,12 @@ struct FillCase: Codable, CustomTestStringConvertible {
     }
 
     var testDescription: String { name }
+
+    /// A case that asserts nothing passes for the wrong reason, and a mistyped key
+    /// decodes to nothing rather than to an error.
+    var assertsSomething: Bool {
+        !(want ?? []).isEmpty || nonOverlapping == true
+    }
 }
 
 struct FillSection: Codable {
@@ -44,6 +50,8 @@ struct FillTests {
 
     @Test(arguments: cases)
     func fillsAsTheCorpusSays(fillCase: FillCase) {
+        #expect(fillCase.assertsSomething, "\(fillCase.name): asserts nothing")
+
         let pairs = fillCase.pairs.reduce(into: [Int: RecognizedWord]()) { result, pair in
             result[pair.word] = RecognizedWord(text: pair.text, start: pair.start, end: pair.end)
         }

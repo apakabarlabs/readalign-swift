@@ -20,6 +20,12 @@ struct AlignCase: Codable, CustomTestStringConvertible {
     }
 
     var testDescription: String { name }
+
+    /// A case that asserts nothing passes for the wrong reason, and a mistyped key
+    /// decodes to nothing rather than to an error.
+    var assertsSomething: Bool {
+        wantEmpty == true || !(want ?? []).isEmpty || strictlyIncreasing != nil
+    }
 }
 
 struct AlignSection: Codable {
@@ -38,6 +44,8 @@ struct AlignTests {
 
     @Test(arguments: cases)
     func alignsAsTheCorpusSays(alignmentCase: AlignCase) {
+        #expect(alignmentCase.assertsSomething, "\(alignmentCase.name): asserts nothing")
+
         let spans = TranscriptAligner.align(
             expected: alignmentCase.expected,
             heard: alignmentCase.heard.map(\.recognized),

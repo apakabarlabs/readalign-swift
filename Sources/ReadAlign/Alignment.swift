@@ -1,5 +1,3 @@
-import Foundation
-
 /// One run of the alignment: the two word lists, and how much every way of lining
 /// them up is worth.
 ///
@@ -33,6 +31,16 @@ struct Alignment {
     /// a swallowed word is one the reader never has to say.
     var joinThreshold: Double { max(threshold, 0.9) }
 
+    /// A word with no letters in it, once normalised: a numeral, a stray mark, a
+    /// token the recogniser emitted for a noise. Joining onto one is free, because
+    /// it adds nothing to the joined string and so cannot lower the likeness, and a
+    /// free join hands that token's whole stretch of the recording to its neighbour.
+    /// Nothing is being joined there in any case: a join moves a boundary between two
+    /// words, and this side has no word. Passing it over is what the gap is for.
+    func joinable(_ words: ArraySlice<String>) -> Bool {
+        words.allSatisfy { !$0.isEmpty }
+    }
+
     func straight(_ row: Int, _ column: Int) -> Double {
         if equivalent?(expected[row], heard[column], row > 0 ? expected[row - 1] : nil) == true { return 1 }
         return worth(TranscriptAligner.similarity(expected[row], heard[column]), against: threshold)
@@ -40,7 +48,9 @@ struct Alignment {
 
     /// One written word against the `span` heard words ending at `column`, joined up.
     func joinedHeard(_ row: Int, _ column: Int, span: Int) -> Double {
-        let joined = heard[(column - span + 1)...column].joined()
+        let parts = heard[(column - span + 1)...column]
+        guard joinable(parts), !expected[row].isEmpty else { return mismatchPenalty }
+        let joined = parts.joined()
         if equivalent?(expected[row], joined, row > 0 ? expected[row - 1] : nil) == true { return 1 }
         return worth(TranscriptAligner.similarity(expected[row], joined), against: joinThreshold)
     }
@@ -60,6 +70,7 @@ struct Alignment {
     /// threshold. Narrowing the entry to the second word instead does not work, since
     /// the one heard word is then spent on it and the first has nothing left to match.
     func joinedExpected(_ row: Int, _ column: Int) -> Double {
+        guard joinable(expected[(row - 1)...row]), !heard[column].isEmpty else { return mismatchPenalty }
         let joined = expected[row - 1] + expected[row]
         // The company is the word before the pair, so a patch confined to one turn of
         // phrase is confined the same way here as it is anywhere else.
@@ -74,6 +85,9 @@ struct Alignment {
     /// failed on two words they said. Joined on both sides the two spellings are one
     /// string, which is what says the reading was right.
     func joinedPair(_ row: Int, _ column: Int) -> Double {
+        guard joinable(expected[(row - 1)...row]), joinable(heard[(column - 1)...column]) else {
+            return mismatchPenalty
+        }
         let written = expected[row - 1] + expected[row]
         let said = heard[column - 1] + heard[column]
         if equivalent?(written, said, row > 1 ? expected[row - 2] : nil) == true { return 1 }

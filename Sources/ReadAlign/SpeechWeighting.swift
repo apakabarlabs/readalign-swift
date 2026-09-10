@@ -1,5 +1,3 @@
-import Foundation
-
 /// How long a word takes to say, relative to its neighbours.
 ///
 /// A protocol rather than a function so each language brings its own: syllable

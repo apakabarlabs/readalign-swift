@@ -25,9 +25,28 @@ struct SimilarityCase: Codable, CustomTestStringConvertible {
     var testDescription: String { "\(left) against \(right)" }
 }
 
+struct SyllableCase: Codable, CustomTestStringConvertible {
+    let word: String
+    let count: Int?
+    let atLeast: Int?
+
+    enum CodingKeys: String, CodingKey {
+        case word, count
+        case atLeast = "at_least"
+    }
+
+    var testDescription: String { word }
+}
+
 struct WordFile: Codable {
     let normalize: [NormalizeCase]
     let similarity: [SimilarityCase]
+    let englishSyllables: [SyllableCase]
+
+    enum CodingKeys: String, CodingKey {
+        case normalize, similarity
+        case englishSyllables = "english_syllables"
+    }
 }
 
 struct WordTests {
@@ -49,6 +68,17 @@ struct WordTests {
         }
         if let ceiling = similarityCase.atMost {
             #expect(score <= ceiling)
+        }
+    }
+
+    @Test(arguments: file.englishSyllables)
+    func countsEnglishSyllablesAsTheCorpusSays(syllableCase: SyllableCase) {
+        let counted = EnglishSyllableWeighting().syllableCount(of: syllableCase.word)
+        if let exact = syllableCase.count {
+            #expect(counted == exact, "\(syllableCase.word)")
+        }
+        if let floor = syllableCase.atLeast {
+            #expect(counted >= floor, "\(syllableCase.word)")
         }
     }
 }

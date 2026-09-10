@@ -1,4 +1,4 @@
-.PHONY: build test lint lint-fix clean install
+.PHONY: build test test-build lint lint-fix format clean install
 
 build:
 	swift build
@@ -6,15 +6,21 @@ build:
 test:
 	swift test
 
+test-build:
+	swift build --build-tests
+
 lint:
-	swiftlint
+	swiftlint --strict
 
 lint-fix:
 	swiftlint --fix
 
+format:
+	swift-format -i -r Sources Tests
+
 clean:
 	swift package clean
-	rm -rf .build Package.resolved
+	rm -rf .build
 
 install:
-	brew install swiftlint
+	brew install swiftlint swift-format

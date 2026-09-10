@@ -12,6 +12,12 @@ struct MatchCase: Codable, CustomTestStringConvertible {
     let contiguous: [Int]?
 
     var testDescription: String { name }
+
+    /// A case that asserts nothing passes for the wrong reason, and a mistyped key
+    /// decodes to nothing rather than to an error.
+    var assertsSomething: Bool {
+        !(want ?? []).isEmpty || contiguous != nil
+    }
 }
 
 struct MatchSection: Codable {
@@ -30,6 +36,8 @@ struct MatchTests {
 
     @Test(arguments: cases)
     func placesWordsAsTheCorpusSays(matchCase: MatchCase) throws {
+        #expect(matchCase.assertsSomething, "\(matchCase.name): asserts nothing")
+
         let placed = TranscriptAligner.match(
             expected: matchCase.expected,
             heard: matchCase.heard.map(\.recognized),

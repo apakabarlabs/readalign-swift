@@ -33,6 +33,95 @@ tests:
           - expected: [0, 2]
             heard: [0, 2]
 
+  - section: "A join has to be earned"
+    cases:
+      - name: "a join loose enough to swallow a whole word is refused"
+        why: >
+          A join is held to a stricter bar than a single word, because loosely it
+          swallows the neighbouring word whole and a swallowed word is one the reader
+          never has to say. "creatures we" against "creatures" alone is alike enough
+          for an ordinary match and not alike enough for a join, so "we" stays
+          unmatched instead of disappearing into its neighbour.
+        expected: ["creatures", "we"]
+        heard: ["creatures"]
+        threshold: 0.6
+        want:
+          - expected: [0, 1]
+            heard: [0, 1]
+        want_absent:
+          - expected: [0, 2]
+            heard: [0, 1]
+
+      - name: "a token with no letters in it is not joined onto its neighbour"
+        why: >
+          A numeral or a stray mark normalises to nothing, so joining onto it adds
+          nothing to the joined string and cannot lower the likeness. Free, the join
+          would hand that token's whole stretch of the recording to the word beside
+          it. There is nothing to join in any case: a join moves a boundary between
+          two words, and this side has no word.
+        expected: ["From", "fairest"]
+        heard: ["from", "1999", "fairest"]
+        threshold: 0.6
+        want:
+          - expected: [0, 1]
+            heard: [0, 1]
+        want_absent:
+          - expected: [0, 1]
+            heard: [0, 2]
+
+      - name: "a written word with no letters is not joined onto its neighbour either"
+        expected: ["Sonnet", "18", "eighteen"]
+        heard: ["sonnet", "eighteen"]
+        threshold: 0.6
+        want_absent:
+          - expected: [0, 2]
+            heard: [0, 1]
+
+  - section: "Pairs the caller vouches for"
+    cases:
+      - name: "a patched pair is matched however unalike it looks"
+        why: >
+          "heir" and "air" share two letters, so similarity alone never offers them
+          for comparison and the patch that knows better is never asked. The patch
+          reaches the alignment itself for exactly that reason.
+        expected: ["the", "heir"]
+        heard: ["the", "air"]
+        threshold: 0.6
+        equivalent:
+          - {written: "heir", heard: "air"}
+        want:
+          - expected: [1, 2]
+            heard: [1, 2]
+
+      - name: "a patch confined to one turn of phrase does not apply elsewhere"
+        why: >
+          The word before the pair comes along because a patch may be confined to one
+          turn of phrase, and only the alignment knows what stands where. The same
+          pair after a different word is not the patched one.
+        expected: ["an", "heir"]
+        heard: ["an", "air"]
+        threshold: 0.6
+        equivalent:
+          - {written: "heir", heard: "air", after: "the"}
+        want_absent:
+          - expected: [1, 2]
+            heard: [1, 2]
+
+      - name: "a patch is asked with the written pair joined up as well"
+        why: >
+          A recogniser writes two written words as one: "in sense" comes back
+          "incense", which is what those two words sound like said in a row.
+          Similarity alone will not carry that over the join bar, so the patch table
+          is asked with the pair joined, exactly as it is on the heard side.
+        expected: ["in", "sense"]
+        heard: ["incense"]
+        threshold: 0.6
+        equivalent:
+          - {written: "insense", heard: "incense"}
+        want:
+          - expected: [0, 2]
+            heard: [0, 1]
+
   - section: "A compound written with hyphens"
     cases:
       - name: "a compound of three parts matches the three words it is heard as"

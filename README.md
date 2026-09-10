@@ -36,6 +36,8 @@ let spans = TranscriptAligner.align(
 
 One span per expected word, in reading order. What a word is on the page — which line it sits in, which of its letters get painted — stays with the caller.
 
+The one exception is a recording nothing was heard in: that comes back empty rather than with a span per word, because every span would be a guess dressed as a measurement. Check for it before indexing.
+
 To ask only which word came back as which, without times:
 
 ```swift
@@ -57,9 +59,13 @@ Time is shared out among unmatched words by `SpeechWeighting`. `EnglishSyllableW
 
 ## Install
 
+While the repository is private this package carries no version tags, so a consumer pins the commit it read:
+
 ```swift
-.package(url: "https://github.com/apakabarlabs/readalign-swift", from: "0.1.0")
+.package(url: "https://github.com/apakabarlabs/readalign-swift", revision: "<commit>")
 ```
+
+A `from:` requirement resolves to nothing until the first tag is cut.
 
 ## The case corpus
 

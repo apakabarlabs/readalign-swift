@@ -81,7 +81,9 @@ tests:
       - name: "a word the reader never said does not steal a match"
         why: >
           An "um" between two words costs less to pass over than to pair with one of
-          them, so it does not push a written word off its own time.
+          them, so it does not push a written word off its own time. "we" is heard in
+          the fourth second, and that is the second it must come back with: pairing
+          the "um" with it instead would hand it the third.
         expected:
           ["From", "fairest", "creatures", "we", "desire", "increase",
            "That", "thereby", "beauty’s", "rose", "might", "never", "die"]
@@ -101,7 +103,38 @@ tests:
           - {text: "never", start: 12, end: 12.8}
           - {text: "die", start: 13, end: 13.8}
         duration: 20
-        want: []
+        want:
+          - {word: 2, start: 2}
+          - {word: 3, start: 4}
+          - {word: 12, start: 13}
+
+      - name: "a written word is left unplaced rather than paired with a stranger"
+        why: >
+          Passing both words over has to cost less than pairing them, or every word
+          the recogniser invents lands on a written word and reports it at an instant
+          nobody said it. Here nothing in the recording is "home", so "home" is placed
+          across what is left of the recording rather than onto the stranger's second.
+        expected: ["house", "home"]
+        heard:
+          - {text: "house", start: 0, end: 1}
+          - {text: "zzz", start: 5, end: 6}
+        duration: 10
+        want:
+          - {word: 0, start: 0, end: 1}
+          - {word: 1, start: 1, end: 10}
+
+      - name: "a word too unlike the one written does not take its time"
+        why: >
+          Below the bar, a pairing is worse than passing both words over. Otherwise
+          any two words that are merely not opposites pair, and the written word is
+          reported at an instant nobody said it. Unmatched, it is placed across the
+          whole recording instead, which says only that it is somewhere in there.
+        expected: ["thou"]
+        heard:
+          - {text: "increase", start: 5, end: 6}
+        duration: 10
+        want:
+          - {word: 0, start: 0, end: 10}
 
   - section: "Nothing heard at all"
     cases:

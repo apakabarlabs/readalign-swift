@@ -248,8 +248,13 @@ public enum TranscriptAligner {
         }
     }
 
+    /// `SpeechWeighting` is written by whoever brings a language, so what comes back
+    /// is not ours to trust. A comparison against a number that is not one is false
+    /// whichever way round it is put, so `max` passes such a value straight through
+    /// and every span computed from it comes out unusable without an error anywhere.
     private static func speechWeight(of word: String, using weighting: any SpeechWeighting) -> Double {
-        max(weighting.weight(of: word), 1)
+        let weight = weighting.weight(of: word)
+        return weight.isFinite ? max(weight, 1) : 1
     }
 
     /// Letters only, lowercased. Elision marks and punctuation are exactly what a

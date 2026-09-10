@@ -22,3 +22,25 @@ similarity:
   - left: "thou"
     right: "increase"
     at_most: 0.4
+
+# English syllables, counted by vowel groups less a silent final "e". Right enough
+# to decide whether a long word gets more of a pause than a short one, and wrong on
+# plenty of words besides; the cases below are the ones the count is held to.
+english_syllables:
+  - word: "I"
+    count: 1
+  - word: "rose"
+    count: 1
+  - word: "increase"
+    count: 2
+  - word: "memory"
+    count: 3
+  - word: "self-substantial"
+    at_least: 4
+  # The silent final "e" is the whole reason the count is not just vowel groups:
+  # without the rule "rose" reads as two syllables and takes twice the airtime.
+  - word: "stone"
+    count: 1
+  # Not dropped after "l", or "little" comes out as one syllable.
+  - word: "little"
+    count: 2

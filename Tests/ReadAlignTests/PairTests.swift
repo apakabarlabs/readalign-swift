@@ -14,21 +14,47 @@ struct Pairing: Codable {
     var described: String { "expected \(expected), heard \(heard)" }
 }
 
+/// A pair the caller vouches for, whatever it looks like. `after` narrows the patch
+/// to one turn of phrase: the written word that has to stand before the pair.
+struct EquivalentEntry: Codable {
+    let written: String
+    let heard: String
+    let after: String?
+}
+
 struct PairCase: Codable, CustomTestStringConvertible {
     let name: String
     let why: String?
     let expected: [String]
     let heard: [String]
     let threshold: Double
+    let equivalent: [EquivalentEntry]?
     let want: [Pairing]?
     let wantAbsent: [Pairing]?
 
     enum CodingKeys: String, CodingKey {
-        case name, why, expected, heard, threshold, want
+        case name, why, expected, heard, threshold, equivalent, want
         case wantAbsent = "want_absent"
     }
 
     var testDescription: String { name }
+
+    /// A case that asserts nothing passes for the wrong reason, and a mistyped key
+    /// decodes to nothing rather than to an error.
+    var assertsSomething: Bool {
+        !(want ?? []).isEmpty || !(wantAbsent ?? []).isEmpty
+    }
+
+    var patch: ((String, String, String?) -> Bool)? {
+        guard let entries = equivalent else { return nil }
+        return { written, heard, after in
+            entries.contains { entry in
+                entry.written == written
+                    && entry.heard == heard
+                    && (entry.after == nil || entry.after == after)
+            }
+        }
+    }
 }
 
 struct PairSection: Codable {
@@ -47,10 +73,13 @@ struct PairTests {
 
     @Test(arguments: cases)
     func pairsAsTheCorpusSays(pairCase: PairCase) {
+        #expect(pairCase.assertsSomething, "\(pairCase.name): asserts nothing")
+
         let matches = TranscriptAligner.pair(
             expected: pairCase.expected,
             heard: pairCase.heard,
-            threshold: pairCase.threshold
+            threshold: pairCase.threshold,
+            equivalent: pairCase.patch
         )
 
         for wanted in pairCase.want ?? [] {

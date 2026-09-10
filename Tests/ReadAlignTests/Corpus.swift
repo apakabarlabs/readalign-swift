@@ -59,18 +59,18 @@ enum WeightingName: String, Codable {
 
 extension WordSpan {
     func check(against expectation: SpanExpectation, in name: String) {
-        let where_ = "\(name), word \(expectation.word)"
+        let subject = "\(name), word \(expectation.word)"
         if let start = expectation.start {
-            #expect(abs(self.start - start) < Corpus.tolerance, "\(where_): start")
+            #expect(abs(self.start - start) < Corpus.tolerance, "\(subject): start")
         }
         if let end = expectation.end {
-            #expect(abs(self.end - end) < Corpus.tolerance, "\(where_): end")
+            #expect(abs(self.end - end) < Corpus.tolerance, "\(subject): end")
         }
         if let floor = expectation.startAtLeast {
-            #expect(self.start >= floor - Corpus.tolerance, "\(where_): start at least")
+            #expect(self.start >= floor - Corpus.tolerance, "\(subject): start at least")
         }
         if let ceiling = expectation.endAtMost {
-            #expect(self.end <= ceiling + Corpus.tolerance, "\(where_): end at most")
+            #expect(self.end <= ceiling + Corpus.tolerance, "\(subject): end at most")
         }
     }
 }
