@@ -32,3 +32,18 @@ folded_letters:
   "ø": "o"
   "ħ": "h"
   "ŧ": "t"
+
+# Holding a word open through the silence after it, which needs the recording.
+# Short enough to find the edge of a consonant, long enough that one loud sample
+# cannot pass for speech.
+frame_seconds: 0.01
+
+# Louder than the room, quieter than a voice. Taken from the recording rather than
+# fixed, because one reader is recorded hotter than another: the quietest tenth of
+# the frames is the room, and speech is what stands well clear of it.
+room_quantile: 0.1
+speech_above_room: 4
+quietest_room: 0.0001
+
+# How far past its own mark a word may be held.
+hold_limit: 0.6

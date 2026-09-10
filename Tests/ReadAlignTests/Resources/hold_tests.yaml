@@ -1,0 +1,134 @@
+# Holding a word open through the silence after it.
+#
+# This is the one part that needs the recording, so a case describes the recording
+# rather than shipping one: a list of stretches, each with how loud it is and how
+# long it lasts, which every port builds into samples for itself. No audio file
+# goes anywhere near this corpus.
+#
+# A recogniser marks where a word stops being audible, not where the voice has
+# finished with it. The release of a final consonant and the fall of a line land
+# beyond the mark, so a passage played to the last word's mark stops a hair early,
+# every time, and is heard as a fault in the recording.
+tests:
+  - section: "A word held to the quiet behind it"
+    cases:
+      - name: "each word is held through its trailing silence, and no further"
+        why: >
+          Two words with a pause after each. Both marks fall inside the sound, and
+          both are carried to where the recording has gone quiet -- but the first
+          stops at the pause rather than running on into the second word.
+        sample_rate: 16000
+        waveform:
+          - {level: 0.5, seconds: 0.15}
+          - {level: 0.0, seconds: 0.10}
+          - {level: 0.5, seconds: 0.20}
+          - {level: 0.0, seconds: 0.10}
+        spans:
+          - {start: 0.05, end: 0.10}
+          - {start: 0.30, end: 0.40}
+        want:
+          - {word: 0, end: 0.25}
+          - {word: 1, end: 0.55}
+
+      - name: "a recording with nothing in it leaves the marks alone"
+        why: >
+          Nothing to measure a room against, so nothing is moved rather than
+          everything being carried to the end.
+        sample_rate: 16000
+        waveform: []
+        spans:
+          - {start: 0.05, end: 0.10}
+        want:
+          - {word: 0, end: 0.10}
+
+      - name: "a mark is never carried past the word that follows"
+        why: >
+          Two written words matched to one heard token come back sharing its
+          stretch, so the next word may start where this one ends already. A held
+          end that ran past it would play one word into the next however carefully
+          the silence was measured.
+        sample_rate: 16000
+        waveform:
+          - {level: 0.5, seconds: 0.60}
+        spans:
+          - {start: 0.00, end: 0.20}
+          - {start: 0.20, end: 0.40}
+        want:
+          - {word: 0, end: 0.20}
+
+      - name: "the last word is held to the end of what is left"
+        why: >
+          Nothing follows it, so there is no next word to stop at and nothing but
+          quiet ahead. It is held to the limit, which is the whole point for a last
+          word: a passage played to the mark stops a hair short of itself.
+        sample_rate: 16000
+        waveform:
+          - {level: 0.5, seconds: 0.10}
+          - {level: 0.0, seconds: 0.50}
+        spans:
+          - {start: 0.00, end: 0.30}
+        want:
+          - {word: 0, end: 0.60}
+
+      - name: "the hold stops right at the next word and not one frame into it"
+        why: >
+          A word held into the sound of the one after it plays the two together,
+          which is heard as the recording running on.
+        sample_rate: 1000
+        limit: 1
+        waveform:
+          - {level: 0.0, seconds: 0.60}
+          - {level: 0.5, seconds: 0.10}
+          - {level: 0.0, seconds: 0.30}
+        spans:
+          - {start: 0.00, end: 0.20}
+          - {start: 0.60, end: 0.70}
+        want:
+          - {word: 0, end: 0.60}
+
+      - name: "sound still going at the mark is this word finishing, and is walked through"
+        why: >
+          The mark often lands before a word has finished sounding: a recogniser
+          calls "eyes" done and leaves its final consonant outside. Stopping at the
+          first loud frame took that for the next word starting, so the word was not
+          held at all and a line ending on it played cut in half.
+        sample_rate: 1000
+        limit: 1
+        waveform:
+          - {level: 0.0, seconds: 0.20}
+          - {level: 0.5, seconds: 0.10}
+          - {level: 0.0, seconds: 0.30}
+          - {level: 0.5, seconds: 0.10}
+          - {level: 0.0, seconds: 0.30}
+        spans:
+          - {start: 0.00, end: 0.20}
+          - {start: 0.60, end: 0.70}
+        want:
+          - {word: 0, end: 0.60}
+
+      - name: "a silence that never returns to sound is held only as far as the limit"
+        why: >
+          Otherwise a long pause between stanzas would be played out in full.
+        sample_rate: 1000
+        limit: 0.3
+        waveform:
+          - {level: 0.0, seconds: 1.0}
+        spans:
+          - {start: 0.00, end: 0.20}
+        want:
+          - {word: 0, end: 0.50}
+
+      - name: "a word is not held into the sound of the word after it"
+        why: >
+          The hold stops as soon as the recording speaks again, so the pause is
+          given to the word that owns it and not a frame of the next word's sound.
+        sample_rate: 16000
+        waveform:
+          - {level: 0.5, seconds: 0.10}
+          - {level: 0.0, seconds: 0.20}
+          - {level: 0.5, seconds: 0.30}
+        spans:
+          - {start: 0.00, end: 0.08}
+          - {start: 0.30, end: 0.60}
+        want:
+          - {word: 0, end: 0.30}

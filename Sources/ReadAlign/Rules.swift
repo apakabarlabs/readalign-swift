@@ -9,6 +9,11 @@ public struct Rules: Codable, Sendable {
     public let roomEnough: TimeInterval
     public let englishVowels: String
     public let foldedLetters: [String: String]
+    public let frameSeconds: TimeInterval
+    public let roomQuantile: Double
+    public let speechAboveRoom: Double
+    public let quietestRoom: Double
+    public let holdLimit: TimeInterval
 
     enum CodingKeys: String, CodingKey {
         case matchThreshold = "match_threshold"
@@ -18,6 +23,11 @@ public struct Rules: Codable, Sendable {
         case roomEnough = "room_enough"
         case englishVowels = "english_vowels"
         case foldedLetters = "folded_letters"
+        case frameSeconds = "frame_seconds"
+        case roomQuantile = "room_quantile"
+        case speechAboveRoom = "speech_above_room"
+        case quietestRoom = "quietest_room"
+        case holdLimit = "hold_limit"
     }
 
     public static let shared: Rules = Embedded.getYAML(Bundle.module, path: "rules.yaml")
