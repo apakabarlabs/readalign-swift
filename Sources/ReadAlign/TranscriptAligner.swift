@@ -188,7 +188,15 @@ public enum TranscriptAligner {
         max(word.split(separator: "-").count, 1)
     }
 
+    public static func fold(_ word: String) -> String {
+        let lifted = word.folding(options: .diacriticInsensitive, locale: nil)
+        return String(lifted.map { character in
+            Rules.shared.foldedLetters[String(character)].flatMap(\.first) ?? character
+        })
+    }
+
     static func similarity(_ left: String, _ right: String) -> Double {
+        let (left, right) = (fold(left), fold(right))
         if left == right { return 1 }
         if left.isEmpty || right.isEmpty { return 0 }
         let distance = editDistance(Array(left), Array(right))

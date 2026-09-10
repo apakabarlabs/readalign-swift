@@ -21,3 +21,14 @@ room_enough: 0.04
 
 # Letters that open a syllable for the English weighting.
 english_vowels: "aeiouy"
+
+# Likeness is measured with the marks taken off, because a recogniser trained on
+# plain Latin returns "casa" for "čaša" and the word is still the word. Unicode
+# takes off a mark that sits above a letter; these carry theirs through the letter
+# itself, so it has nothing to lift and they are listed instead.
+folded_letters:
+  "ł": "l"
+  "đ": "d"
+  "ø": "o"
+  "ħ": "h"
+  "ŧ": "t"

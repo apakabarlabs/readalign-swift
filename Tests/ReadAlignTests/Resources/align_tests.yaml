@@ -136,6 +136,107 @@ tests:
         want:
           - {word: 0, start: 0, end: 10}
 
+  - section: "Languages other than English"
+    cases:
+      - name: "polish: a word the recogniser spelled its own way keeps its own second"
+        why: >
+          Measured, not invented: this is a reading of a real tier and a real
+          transcript of it, where the recogniser wrote "rozgardiasz" as
+          "rozgardiarz". The whole reading was thrown away over that one letter
+          before the alignment learned to tolerate it.
+        expected:
+          ["chaos", "nieład", "wrzawa", "rozgardiasz", "awantura",
+           "bijatyka", "krzyk", "bunt", "alarm", "tumult"]
+        heard:
+          - {text: "Chaos", start: 0, end: 0.8}
+          - {text: "Nieład", start: 1, end: 1.8}
+          - {text: "Wrzawa", start: 2, end: 2.8}
+          - {text: "Rozgardiarz", start: 3, end: 3.8}
+          - {text: "Awantura", start: 4, end: 4.8}
+          - {text: "Bijatyka", start: 5, end: 5.8}
+          - {text: "Krzyk", start: 6, end: 6.8}
+          - {text: "Bunt", start: 7, end: 7.8}
+          - {text: "Alarm", start: 8, end: 8.8}
+          - {text: "Tumult", start: 9, end: 9.8}
+        duration: 12
+        weighting: "even"
+        want:
+          - {word: 3, start: 3, end: 3.8}
+          - {word: 9, start: 9, end: 9.8}
+
+      - name: "serbian: a diacritic the recogniser dropped does not lose the word"
+        why: >
+          A recogniser trained on plain Latin returns "ć" as "c" and "š" as "s".
+          Measured before the marks were taken off: in a four-letter word two lost
+          marks put it under the bar, so "čaša" was not found at all and was given
+          a stretch running from the end of "kuća" to the start of "šuma" -- the
+          highlight landing on a word nobody was saying.
+        expected: ["kuća", "čaša", "šuma", "đak"]
+        heard:
+          - {text: "kuca", start: 0, end: 0.8}
+          - {text: "casa", start: 1, end: 1.8}
+          - {text: "suma", start: 2, end: 2.8}
+          - {text: "djak", start: 3, end: 3.8}
+        duration: 5
+        weighting: "even"
+        want:
+          - {word: 0, start: 0, end: 0.8}
+          - {word: 1, start: 1, end: 1.8}
+          - {word: 2, start: 2, end: 2.8}
+          - {word: 3, start: 3, end: 3.8}
+
+      - name: "albanian: a digraph written as one letter is still the same word"
+        why: >
+          Albanian writes sounds as two letters that a recogniser may return as
+          one, and the other way round. Matched on likeness, so "shtëpi" survives
+          coming back as "shtepi".
+        expected: ["shtëpi", "rrugë", "njeri", "dhomë"]
+        heard:
+          - {text: "shtepi", start: 0, end: 0.8}
+          - {text: "rruge", start: 1, end: 1.8}
+          - {text: "njeri", start: 2, end: 2.8}
+          - {text: "dhome", start: 3, end: 3.8}
+        duration: 5
+        weighting: "even"
+        want:
+          - {word: 0, start: 0, end: 0.8}
+          - {word: 3, start: 3, end: 3.8}
+
+      - name: "georgian: a script with no capitals and no latin letters aligns the same"
+        why: >
+          Nothing in the alignment may assume the Latin alphabet. Georgian has one
+          case rather than two, so lowercasing changes nothing, and every letter is
+          outside the ASCII range.
+        expected: ["სახლი", "წიგნი", "მზე", "ქალაქი"]
+        heard:
+          - {text: "სახლი", start: 0, end: 0.8}
+          - {text: "წიგნი", start: 1, end: 1.8}
+          - {text: "მზე", start: 2, end: 2.8}
+          - {text: "ქალაქი", start: 3, end: 3.8}
+        duration: 5
+        weighting: "even"
+        want:
+          - {word: 0, start: 0, end: 0.8}
+          - {word: 3, start: 3, end: 3.8}
+
+      - name: "spanish: two written words heard as one share the stretch between them"
+        why: >
+          Spanish runs words together in speech, and a recogniser writes what it
+          hears: "de el" comes back as "del". Both written words have to come out
+          of that one stretch rather than both being given all of it.
+        expected: ["casa", "de", "el", "pueblo"]
+        heard:
+          - {text: "casa", start: 0, end: 1}
+          - {text: "del", start: 1, end: 2}
+          - {text: "pueblo", start: 2, end: 3}
+        duration: 4
+        weighting: "even"
+        want:
+          - {word: 0, start: 0, end: 1}
+          - {word: 1, start: 1, end: 1.5}
+          - {word: 2, start: 1.5, end: 2}
+          - {word: 3, start: 2, end: 3}
+
   - section: "Nothing heard at all"
     cases:
       - name: "nothing heard at all yields nothing rather than a guess"

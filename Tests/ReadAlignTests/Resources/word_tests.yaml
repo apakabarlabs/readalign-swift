@@ -13,6 +13,29 @@ normalize:
     want: "worldwithoutend"
 
 similarity:
+  # Likeness is measured with the marks taken off. A recogniser trained on plain
+  # Latin returns "casa" for "čaša", and in a four-letter word two lost marks put
+  # it under any usable bar, so the word would not be found at all and would be
+  # given a stretch of the recording belonging to its neighbours.
+  - left: "čaša"
+    right: "casa"
+    equals: 1.0
+  - left: "łódź"
+    right: "lodz"
+    equals: 1.0
+  - left: "đak"
+    right: "djak"
+    at_least: 0.6
+  - left: "shtëpi"
+    right: "shtepi"
+    equals: 1.0
+  - left: "señor"
+    right: "senor"
+    equals: 1.0
+  # Taking the marks off must not make two different words the same word.
+  - left: "kuća"
+    right: "muža"
+    at_most: 0.6
   - left: "beautys"
     right: "beautys"
     equals: 1.0
