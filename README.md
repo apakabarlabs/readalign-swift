@@ -131,12 +131,16 @@ The corpus is checked by mutation: changing the join bar, the match bar, the ski
 ## Install
 
 ```swift
-.package(path: "../../readalign-swift")
+.package(url: "https://github.com/apakabarlabs/readalign-swift", from: "0.1.0")
 ```
 
-Our own apps take it from the checkout beside them, so a change here is in the app on the next build without a hop through a tag.
+The API at 0.1.0 is not settled and may change without a major version, so pin an exact version if that matters to you.
 
-The repository carries no version tags yet, so a `from:` requirement resolves to nothing; an outside consumer pins a commit until the first tag is cut.
+Our own apps take it from the checkout beside them instead, so a change here is in the app on the next build without a hop through a tag:
+
+```swift
+.package(path: "../../readalign-swift")
+```
 
 ## Develop
 
