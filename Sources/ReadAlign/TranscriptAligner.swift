@@ -39,24 +39,27 @@ public enum TranscriptAligner {
         expected: [String],
         heard: [RecognizedWord],
         duration: TimeInterval,
-        weighting: any SpeechWeighting = EnglishSyllableWeighting()
+        weighting: any SpeechWeighting = EnglishSyllableWeighting(),
+        equivalent: ((String, String, String?) -> Bool)? = nil
     ) -> [WordSpan] {
         guard !expected.isEmpty else { return [] }
         guard !heard.isEmpty else { return [] }
 
-        let pairs = match(expected: expected, heard: heard, weighting: weighting)
+        let pairs = match(expected: expected, heard: heard, weighting: weighting, equivalent: equivalent)
         return fill(expected: expected, pairs: pairs, duration: duration, weighting: weighting)
     }
 
     static func match(
         expected: [String],
         heard: [RecognizedWord],
-        weighting: any SpeechWeighting = EnglishSyllableWeighting()
+        weighting: any SpeechWeighting = EnglishSyllableWeighting(),
+        equivalent: ((String, String, String?) -> Bool)? = nil
     ) -> [Int: RecognizedWord] {
         let matches = pair(
             expected: expected,
             heard: heard.map(\.text),
-            threshold: matchThreshold
+            threshold: matchThreshold,
+            equivalent: equivalent
         )
         return matches.reduce(into: [Int: RecognizedWord]()) { result, match in
             let start = heard[match.heard.lowerBound].start

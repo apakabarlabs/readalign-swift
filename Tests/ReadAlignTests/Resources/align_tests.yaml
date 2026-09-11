@@ -263,6 +263,25 @@ tests:
           - {word: 2, start: 1.5, end: 2}
           - {word: 3, start: 2, end: 3}
 
+  - section: "Pairs the caller vouches for"
+    cases:
+      - name: "a word the caller vouches for keeps the time it was heard at"
+        why: >
+          Measured, not invented: read aloud, "queue" is heard and written down as
+          "cue", and "rustle" as "Russell". The word was said correctly and the
+          recording is good, so the caller who knows the two sound alike says so,
+          and the word takes its own second instead of being passed over.
+        expected: ["wait", "queue", "linger"]
+        heard:
+          - {text: "wait", start: 0, end: 0.8}
+          - {text: "cue", start: 1, end: 1.8}
+          - {text: "linger", start: 2, end: 2.8}
+        duration: 4
+        equivalent:
+          - {written: "queue", heard: "cue"}
+        want:
+          - {word: 1, start: 1, end: 1.8}
+
   - section: "Nothing heard at all"
     cases:
       - name: "nothing heard at all yields nothing rather than a guess"

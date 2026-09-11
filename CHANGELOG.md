@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.3.0
+
+Nothing you call has to change. What comes back changes wherever accents are involved, on either side — see Fixed.
+
+### Added
+- `align` takes the optional `equivalent` closure `pair` already had: it is asked the written word, the heard word, and the written word before it — `nil` at the start of the text — and answers `true` when those two are the same word however unlike they are spelled. Left out, nothing is vouched for and similarity alone decides, as before. Homophones are why it now reaches the times and not only the pairing: read aloud, `queue` comes back written `cue` and `rustle` comes back `Russell`, and without a word for it the written word is passed over and its time shared out among its neighbours.
+
+### Fixed
+- Deciding whether two spellings are the same word ignores the accents of the Latin alphabet and nothing else. It used to ignore every combining mark Unicode knows, which reached far past the alphabet that was meant for: `мой` matched `мои`, and Japanese and Devanagari words differing only by a mark matched each other. Those no longer match, and the times such words were given move. Letters carrying a stroke rather than an accent, `ł` and `đ` among them, are folded to their plain letter as before.
+- Two spellings are compared by the letters a reader sees rather than by the characters Unicode stores: `é` written as one character and `é` written as `e` followed by an accent now count as one letter apiece, where they used to differ twice over. A pair that used to fall short of `threshold`, the bar for being the same word, can now clear it — in Latin text as much as anywhere else.
+
 ## 0.2.0
 
 A Python port of this library now exists, and the two are held to one set of tuned numbers and one set of cases so they cannot come to disagree. Both carry the same major and minor version for that reason.

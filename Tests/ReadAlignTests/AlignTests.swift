@@ -9,12 +9,13 @@ struct AlignCase: Codable, CustomTestStringConvertible {
     let heard: [HeardWord]
     let duration: TimeInterval
     let weighting: WeightingName?
+    let equivalent: [EquivalentEntry]?
     let want: [SpanExpectation]?
     let strictlyIncreasing: [Int]?
     let wantEmpty: Bool?
 
     enum CodingKeys: String, CodingKey {
-        case name, why, expected, heard, duration, weighting, want
+        case name, why, expected, heard, duration, weighting, equivalent, want
         case strictlyIncreasing = "strictly_increasing"
         case wantEmpty = "want_empty"
     }
@@ -23,6 +24,17 @@ struct AlignCase: Codable, CustomTestStringConvertible {
 
     var assertsSomething: Bool {
         wantEmpty == true || !(want ?? []).isEmpty || strictlyIncreasing != nil
+    }
+
+    var patch: ((String, String, String?) -> Bool)? {
+        guard let entries = equivalent else { return nil }
+        return { written, heard, after in
+            entries.contains { entry in
+                entry.written == written
+                    && entry.heard == heard
+                    && (entry.after == nil || entry.after == after)
+            }
+        }
     }
 }
 
@@ -48,7 +60,8 @@ struct AlignTests {
             expected: alignmentCase.expected,
             heard: alignmentCase.heard.map(\.recognized),
             duration: alignmentCase.duration,
-            weighting: (alignmentCase.weighting ?? .english).weighting
+            weighting: (alignmentCase.weighting ?? .english).weighting,
+            equivalent: alignmentCase.patch
         )
 
         if alignmentCase.wantEmpty == true {

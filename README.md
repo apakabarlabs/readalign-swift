@@ -54,7 +54,7 @@ let matches = TranscriptAligner.pair(
 
 ### Recogniser patches
 
-`pair` takes an optional `equivalent` closure, asked as `(written, heard, the written word before it)`. It is for pairs a particular recogniser reliably gets wrong in a way similarity cannot carry: `heir` and `air` share two letters and would never be offered for comparison otherwise, so the patch that knows better is never asked unless the patch reaches the alignment itself.
+`pair` and `align` both take an optional `equivalent` closure, asked as `(written, heard, the written word before it)`. It is for pairs a particular recogniser reliably gets wrong in a way similarity cannot carry: `heir` and `air` share two letters and would never be offered for comparison otherwise, so the patch that knows better is never asked unless the patch reaches the alignment itself. Homophones are why `align` takes it too: read aloud, `queue` comes back written `cue`, and a reading refused over that is a good recording thrown away.
 
 The predecessor comes along because such a patch is often confined to one turn of phrase, and only the alignment knows what stands where.
 
