@@ -168,3 +168,11 @@ Our own apps take it from the checkout beside them instead, so a change here is 
 make test
 make lint
 ```
+
+## Lines of Code
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset=".github/loc-history-dark.svg">
+  <source media="(prefers-color-scheme: light)" srcset=".github/loc-history-light.svg">
+  <img alt="Lines of Code graph" src=".github/loc-history-light.svg">
+</picture>
