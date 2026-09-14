@@ -15,6 +15,7 @@ public struct Rules: Codable, Sendable {
     public let lightestWord: Double
     public let liftedMarksFrom: String
     public let liftedMarksTo: String
+    public let letterJoiners: [String]
     public let foldedLetters: [String: String]
 
     public let frameSeconds: TimeInterval
@@ -39,6 +40,7 @@ public struct Rules: Codable, Sendable {
         case lightestWord = "lightest_word"
         case liftedMarksFrom = "lifted_marks_from"
         case liftedMarksTo = "lifted_marks_to"
+        case letterJoiners = "letter_joiners"
         case foldedLetters = "folded_letters"
         case frameSeconds = "frame_seconds"
         case roomQuantile = "room_quantile"
@@ -52,7 +54,12 @@ public struct Rules: Codable, Sendable {
     public static let shared: Rules = Embedded.getYAML(Bundle.module, path: "rules.yaml")
 
     /// The marks are written the way Unicode writes them, so they are read that way.
-    private static let hexadecimal = 16
+    static let hexadecimal = 16
+
+    /// Whether this mark writes one consonant joined to the next, making them one letter.
+    public func joins(_ scalar: Unicode.Scalar) -> Bool {
+        letterJoiners.contains { UInt32($0, radix: Self.hexadecimal) == scalar.value }
+    }
 
     public func lifts(_ scalar: Unicode.Scalar) -> Bool {
         guard let first = UInt32(liftedMarksFrom, radix: Self.hexadecimal),

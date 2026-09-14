@@ -51,6 +51,23 @@ lightest_word: 1
 lifted_marks_from: "0300"
 lifted_marks_to: "036F"
 
+# Marks that write one consonant joined to the next, so that the two are one letter
+# on the page and count as one when two spellings are compared. Which of them do this
+# is not something each port may answer for itself, so they are named here.
+#
+# A script is on this list once its cases are in the corpus. Several scripts write a
+# mark that looks like these and do not join their consonants with it -- Tamil and
+# Kannada among them -- so a script is added by being shown, not by resemblance.
+letter_joiners:
+  - "094D"   # Devanagari
+  - "09CD"   # Bengali
+  - "0ACD"   # Gujarati
+  - "0B4D"   # Oriya
+  - "0C4D"   # Telugu
+  - "0D4D"   # Malayalam
+  - "1039"   # Myanmar
+  - "11133"  # Chakma
+
 # Letters that carry their mark through the letter itself, so there is nothing
 # above them to lift.
 folded_letters:

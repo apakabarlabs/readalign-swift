@@ -186,8 +186,43 @@ public enum TranscriptAligner {
 
     /// The letters of a word as a reader sees them, lowercased and brought to one spelling.
     static func letters(_ word: String) -> [String] {
-        lowercased(word.precomposedStringWithCanonicalMapping).filter(isLetter).map(String.init)
+        clusters(lowercased(word.precomposedStringWithCanonicalMapping)).filter(isLetter)
     }
+
+    /// The pieces of text a reader sees as one character each.
+    ///
+    /// Cut by the rules this library shares rather than by whatever the platform carries,
+    /// because every platform carries a different answer and a different vintage of it: one
+    /// cuts a zero-width joiner away from the word it joins, another breaks a joined pair of
+    /// consonants in two. Sharing the rules is what keeps the ports reading one word.
+    static func clusters(_ word: String) -> [String] {
+        var found: [String] = []
+        var letter = String.UnicodeScalarView()
+        for scalar in word.unicodeScalars {
+            if let last = letter.last, !joinsOn(scalar, after: last) {
+                found.append(String(letter))
+                letter = String.UnicodeScalarView()
+            }
+            letter.append(scalar)
+        }
+        if !letter.isEmpty { found.append(String(letter)) }
+        return found
+    }
+
+    /// Whether this belongs to the letter being read rather than starting the next one.
+    private static func joinsOn(_ scalar: Unicode.Scalar, after last: Unicode.Scalar) -> Bool {
+        if isMark(scalar) || scalar == zeroWidthNonJoiner || scalar == zeroWidthJoiner { return true }
+        return Rules.shared.joins(last) && scalar.properties.isAlphabetic
+    }
+
+    /// A mark written above, below or beside a letter, which belongs to that letter.
+    private static func isMark(_ scalar: Unicode.Scalar) -> Bool {
+        [.nonspacingMark, .enclosingMark, .spacingMark].contains(scalar.properties.generalCategory)
+    }
+
+    /// Written inside a word to keep two letters from joining up, or to make them.
+    private static let zeroWidthNonJoiner: Unicode.Scalar = "\u{200C}"
+    private static let zeroWidthJoiner: Unicode.Scalar = "\u{200D}"
 
     /// Lowercased, including the rule that a sigma ending a word is written its own way.
     ///
@@ -222,8 +257,8 @@ public enum TranscriptAligner {
     /// beside a letter. Such a mark on its own is a stray mark rather than a word, and is
     /// meant to normalise to nothing so that it is passed over rather than joined onto its
     /// neighbour.
-    private static func isLetter(_ character: Character) -> Bool {
-        guard let category = character.unicodeScalars.first?.properties.generalCategory else { return false }
+    private static func isLetter(_ cluster: String) -> Bool {
+        guard let category = cluster.unicodeScalars.first?.properties.generalCategory else { return false }
         return [
             .uppercaseLetter, .lowercaseLetter, .titlecaseLetter, .modifierLetter, .otherLetter, .letterNumber
         ].contains(category)
@@ -247,11 +282,13 @@ public enum TranscriptAligner {
         let said = fold(right)
         if written == said { return 1 }
         if written.isEmpty || said.isEmpty { return 0 }
-        let distance = editDistance(Array(written), Array(said))
-        return 1 - Double(distance) / Double(max(written.count, said.count))
+        let writtenLetters = clusters(written)
+        let saidLetters = clusters(said)
+        let distance = editDistance(writtenLetters, saidLetters)
+        return 1 - Double(distance) / Double(max(writtenLetters.count, saidLetters.count))
     }
 
-    private static func editDistance(_ left: [Character], _ right: [Character]) -> Int {
+    private static func editDistance(_ left: [String], _ right: [String]) -> Int {
         var previous = Array(0...right.count)
         var current = Array(repeating: 0, count: right.count + 1)
 

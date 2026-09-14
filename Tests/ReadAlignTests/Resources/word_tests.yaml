@@ -66,6 +66,19 @@ letters:
   - word: "\u0915\u094D\u200C\u0937"
     want: ["\u0915\u094D\u200C", "\u0937"]
 
+  # Other scripts that join a consonant to the next one, and two that write a mark
+  # which looks the same and do not.
+  - word: "\u0995\u09CD\u0995"
+    want: ["\u0995\u09CD\u0995"]
+  - word: "\u0C15\u0C4D\u0C15"
+    want: ["\u0C15\u0C4D\u0C15"]
+  - word: "\u0D15\u0D4D\u0D15"
+    want: ["\u0D15\u0D4D\u0D15"]
+  - word: "\u0B95\u0BCD\u0B95"
+    want: ["\u0B95\u0BCD", "\u0B95"]
+  - word: "\u0C95\u0CCD\u0C95"
+    want: ["\u0C95\u0CCD", "\u0C95"]
+
   # Thai. A vowel written above or below its consonant belongs to it.
   - word: "\u0E2A\u0E27\u0E31\u0E2A\u0E14\u0E35"
     want: ["\u0E2A", "\u0E27\u0E31", "\u0E2A", "\u0E14\u0E35"]

@@ -127,7 +127,11 @@ The same sharing happens inside a single match when several written words were h
 
 Two things live as data rather than as code, so that a port in another language reads them instead of holding its own copy.
 
-`Sources/ReadAlign/Resources/rules.yaml` holds every number the alignment is tuned to: the two bars, the price of a gap and of a bad pair, the shortest span a word can be found at, the letters the English weighting counts as vowels, the letters that carry their mark through the letter itself, and the five that decide how a word is held through the silence after it. Changing one of them changes every port, rather than leaving them quietly apart.
+`Sources/ReadAlign/Resources/rules.yaml` holds every number the alignment is tuned to: the two bars, the price of a gap and of a bad pair, the shortest span a word can be found at, the letters the English weighting counts as vowels, the letters that carry their mark through the letter itself, the marks that join one consonant to the next, and the five that decide how a word is held through the silence after it. Changing one of them changes every port, rather than leaving them quietly apart.
+
+Where a word is cut into letters is in there too, and it has to be. Every platform answers that question, and they answer it differently and at different vintages: one cuts a zero-width joiner away from the word it joins, another breaks a joined pair of consonants in two, and a third answers whatever the phone's operating system happens to know. A library whose whole claim is that three ports read one word cannot leave that to the platform, so the cutting is done here, by rules written down, and pinned letter by letter in the cases.
+
+One thing is still the platform's: which general category a character belongs to. The three runtimes carry that table at different Unicode vintages, so a character added to Unicode more recently than the oldest of them may be read as a letter by two ports and not by the third. Across the whole Basic Multilingual Plane that is 137 characters of 50412, all of them recent additions; it is a known edge rather than a disagreement about how words are read.
 
 There is a Python port at [readalign-python](https://github.com/apakabarlabs/readalign-python) and a Kotlin one at [readalign-kotlin](https://github.com/apakabarlabs/readalign-kotlin), both of which sync these files from here and hold their copies against this repository with a test of their own. All three carry the same major and minor version, so equal numbers mean equal behaviour.
 
