@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.5.0
+
+Nothing you call has to change. What comes back changes for Greek words ending in a capital sigma, and for any word whose letters the platform used to cut apart differently from the sibling ports.
+
+### Changed
+- Where a word is cut into letters is decided here rather than by the platform. Every platform answers that question, and they answer it differently and at different vintages, which a library claiming that three ports read one word cannot leave to whoever is running it. The marks that write one consonant joined to the next are named in `rules.yaml`, and the letters of eleven writing systems are pinned letter by letter in the cases. A script is added to that list by being shown a case, not by resemblance: several scripts write a mark that looks the same and do not join their consonants with it.
+
+### Fixed
+- A sigma ending a Greek word is written its own way, and `lowercased()` writes every sigma the same. A word ending in a capital sigma therefore came back spelled a way the other two libraries would not find it by, and read aloud it was simply not there.
+
 ## 0.4.0
 
 Nothing you call has to change. A token that is only a mark now normalises to nothing, as the documentation always said it did, so what comes back changes where such a token appears.

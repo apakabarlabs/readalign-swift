@@ -151,10 +151,10 @@ Two things it does not hold, and cannot, because neither reaches the result:
 ## Install
 
 ```swift
-.package(url: "https://github.com/apakabarlabs/readalign-swift", from: "0.4.0")
+.package(url: "https://github.com/apakabarlabs/readalign-swift", from: "0.5.0")
 ```
 
-The API at 0.4.0 is not settled and may change without a major version, so pin an exact version if that matters to you.
+The API at 0.5.0 is not settled and may change without a major version, so pin an exact version if that matters to you.
 
 Our own apps take it from the checkout beside them instead, so a change here is in the app on the next build without a hop through a tag:
 
