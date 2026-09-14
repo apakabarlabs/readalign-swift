@@ -184,8 +184,36 @@ public enum TranscriptAligner {
         return weight.isFinite ? max(weight, lightest) : lightest
     }
 
+    /// The letters of a word as a reader sees them, lowercased and brought to one spelling.
+    static func letters(_ word: String) -> [String] {
+        lowercased(word.precomposedStringWithCanonicalMapping).filter(isLetter).map(String.init)
+    }
+
+    /// Lowercased, including the rule that a sigma ending a word is written its own way.
+    ///
+    /// `lowercased()` writes every sigma the same, and the libraries this one shares its
+    /// cases with do not, so a Greek word ending in a capital sigma came back spelled a way
+    /// they would not find it by.
+    ///
+    /// The rule asks whether a cased letter stands before it and none after. Between two
+    /// letters of one word that is the whole of it; the characters Unicode lets the rule
+    /// look past do not appear inside a word.
+    private static func lowercased(_ word: String) -> String {
+        let characters = Array(word)
+        func isCased(_ index: Int) -> Bool {
+            guard characters.indices.contains(index) else { return false }
+            return characters[index].unicodeScalars.contains(where: \.properties.isCased)
+        }
+        return characters.indices
+            .map { index -> String in
+                guard characters[index] == "\u{03A3}" else { return characters[index].lowercased() }
+                return isCased(index - 1) && !isCased(index + 1) ? "\u{03C2}" : "\u{03C3}"
+            }
+            .joined()
+    }
+
     public static func normalize(_ word: String) -> String {
-        word.lowercased().filter(isLetter)
+        letters(word).joined()
     }
 
     /// A letter, or a number written as letters are: a roman numeral is read aloud as a word.

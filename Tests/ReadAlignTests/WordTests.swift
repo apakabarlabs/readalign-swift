@@ -2,6 +2,13 @@ import Foundation
 import Testing
 @testable import ReadAlign
 
+struct LettersCase: Codable, CustomTestStringConvertible {
+    let word: String
+    let want: [String]
+
+    var testDescription: String { "\(word) -> \(want.count)" }
+}
+
 struct NormalizeCase: Codable, CustomTestStringConvertible {
     let word: String
     let want: String
@@ -47,12 +54,13 @@ struct PrintedPartsCase: Codable, CustomTestStringConvertible {
 
 struct WordFile: Codable {
     let printedParts: [PrintedPartsCase]
+    let letters: [LettersCase]
     let normalize: [NormalizeCase]
     let similarity: [SimilarityCase]
     let englishSyllables: [SyllableCase]
 
     enum CodingKeys: String, CodingKey {
-        case normalize, similarity
+        case letters, normalize, similarity
         case printedParts = "printed_parts"
         case englishSyllables = "english_syllables"
     }
@@ -64,6 +72,11 @@ struct WordTests {
     @Test(arguments: file.printedParts)
     func countsPrintedPartsAsTheCorpusSays(partsCase: PrintedPartsCase) {
         #expect(TranscriptAligner.printedParts(partsCase.word) == partsCase.parts, "\(partsCase.word)")
+    }
+
+    @Test(arguments: file.letters)
+    func cutsAWordIntoLettersAsTheCorpusSays(lettersCase: LettersCase) {
+        #expect(TranscriptAligner.letters(lettersCase.word) == lettersCase.want, "\(lettersCase.word)")
     }
 
     @Test(arguments: file.normalize)

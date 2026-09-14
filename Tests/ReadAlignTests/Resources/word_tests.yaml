@@ -20,6 +20,94 @@ printed_parts:
   - word: "-"
     parts: 1
 
+letters:
+  # Where a word is cut into letters, pinned letter by letter. The joined string
+  # cannot pin it: two libraries that disagree about where the cuts fall still
+  # write the same string once the pieces are put back together, which is how a
+  # port came to read a Persian word as something its siblings did not read and
+  # passed every case in this file while doing it.
+  #
+  # A script named here is one this library is held to. Adding another means
+  # adding its cases first, and the letters of a writing system nobody has
+  # written down here are not something a port may decide for itself.
+
+  # Latin. A letter and the mark above it are one letter, however the text spells
+  # them, and a ligature is one letter because a reader sees one.
+  - word: "\u00C5ngstr\u00F6m"
+    want: ["\u00E5", "n", "g", "s", "t", "r", "\u00F6", "m"]
+  - word: "A\u030Angstro\u0308m"
+    want: ["\u00E5", "n", "g", "s", "t", "r", "\u00F6", "m"]
+  - word: "\u0130stanbul"
+    want: ["i\u0307", "s", "t", "a", "n", "b", "u", "l"]
+  - word: "\uFB01ne"
+    want: ["\uFB01", "n", "e"]
+  - word: "\u01C5ungla"
+    want: ["\u01C6", "u", "n", "g", "l", "a"]
+
+  # Cyrillic and Greek. Lowercasing a final sigma is the language's rule, not a
+  # mark being lifted.
+  - word: "\u043C\u043E\u0439"
+    want: ["\u043C", "\u043E", "\u0439"]
+  - word: "\u039F\u0394\u039F\u03A3"
+    want: ["\u03BF", "\u03B4", "\u03BF", "\u03C2"]
+  - word: "\u03A3"
+    want: ["\u03C3"]
+  - word: "\u03A3\u03A3"
+    want: ["\u03C3", "\u03C2"]
+  - word: "\u039F\u0394\u039F\u03A3A"
+    want: ["\u03BF", "\u03B4", "\u03BF", "\u03C3", "a"]
+
+  # Devanagari. A consonant joined to the next by a virama is one letter, and the
+  # zero-width joiner that keeps them apart is part of the letter it belongs to.
+  - word: "\u0928\u092E\u0938\u094D\u0924\u0947"
+    want: ["\u0928", "\u092E", "\u0938\u094D\u0924\u0947"]
+  - word: "\u0928\u092E\u0938\u0924\u0947"
+    want: ["\u0928", "\u092E", "\u0938", "\u0924\u0947"]
+  - word: "\u0915\u094D\u200C\u0937"
+    want: ["\u0915\u094D\u200C", "\u0937"]
+
+  # Thai. A vowel written above or below its consonant belongs to it.
+  - word: "\u0E2A\u0E27\u0E31\u0E2A\u0E14\u0E35"
+    want: ["\u0E2A", "\u0E27\u0E31", "\u0E2A", "\u0E14\u0E35"]
+
+  # Hangul, written as syllables and written as the pieces they are built from.
+  - word: "\uAC00\uB098"
+    want: ["\uAC00", "\uB098"]
+  - word: "\u1100\u1161\u11A8"
+    want: ["\uAC01"]
+
+  # Georgian, which writes no marks at all, and Japanese kana, where the voicing
+  # mark is part of the letter however it is spelled.
+  - word: "\u10D2\u10D0\u10DB\u10D0\u10E0\u10EF\u10DD\u10D1\u10D0"
+    want: ["\u10D2", "\u10D0", "\u10DB", "\u10D0", "\u10E0", "\u10EF", "\u10DD", "\u10D1", "\u10D0"]
+  - word: "\u3056\u308B"
+    want: ["\u3056", "\u308B"]
+  - word: "\u3055\u3099\u308B"
+    want: ["\u3056", "\u308B"]
+
+  # Arabic and Persian. The zero-width non-joiner is written inside a word to keep
+  # two letters from joining up, and taking it out leaves a different word.
+  - word: "\u0645\u06CC\u200C\u0631\u0648\u0645"
+    want: ["\u0645", "\u06CC\u200C", "\u0631", "\u0648", "\u0645"]
+  - word: "\u0645\u064E\u0631\u0652\u062D\u064E\u0628\u064B\u0627"
+    want: ["\u0645\u064E", "\u0631\u0652", "\u062D\u064E", "\u0628\u064B", "\u0627"]
+
+  # Hebrew, where a letter may carry both a vowel point and a dot.
+  - word: "\u05E9\u05B8\u05C1\u05DC\u05D5\u05B9\u05DD"
+    want: ["\u05E9\u05B8\u05C1", "\u05DC", "\u05D5\u05B9", "\u05DD"]
+
+  # What is not a letter is not one: a numeral, a mark standing on its own, and a
+  # mark that takes a place of its own on the page but still belongs to a letter.
+  - word: "1999"
+    want: []
+  - word: "\u0903"
+    want: []
+  - word: "a\u0903"
+    want: ["a\u0903"]
+  # A roman numeral is read aloud as a word and counts as one.
+  - word: "\u216B"
+    want: ["\u217B"]
+
 normalize:
   # A letter and the mark above it are one letter, however the text spells them.
   # The same word typed one way and pasted another must compare the same, or a
