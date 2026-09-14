@@ -37,6 +37,21 @@ normalize:
     want: "feedst"
   - word: "world-without-end"
     want: "worldwithoutend"
+  # A zero-width joiner is part of the word it joins, not punctuation between two
+  # words: taking it out of a Persian or Devanagari word leaves a different word.
+  # Where a language's letters are cut apart is not something each port may answer
+  # for itself, and the answers on offer differ: one library cuts the joiner away,
+  # another breaks a Devanagari conjunct in two.
+  - word: "\u0645\u06CC\u200C\u0631\u0648\u0645"
+    want: "\u0645\u06CC\u200C\u0631\u0648\u0645"
+  - word: "\u0915\u094D\u200C\u0937"
+    want: "\u0915\u094D\u200C\u0937"
+  # A mark that takes a place of its own on the page still belongs to the letter
+  # before it, and on its own is not a letter at all.
+  - word: "a\u0903"
+    want: "a\u0903"
+  - word: "\u0903"
+    want: ""
 
 similarity:
   # Likeness is measured with the marks taken off. A recogniser trained on plain

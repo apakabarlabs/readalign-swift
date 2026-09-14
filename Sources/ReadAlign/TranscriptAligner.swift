@@ -185,7 +185,20 @@ public enum TranscriptAligner {
     }
 
     public static func normalize(_ word: String) -> String {
-        word.lowercased().filter(\.isLetter)
+        word.lowercased().filter(isLetter)
+    }
+
+    /// A letter, or a number written as letters are: a roman numeral is read aloud as a word.
+    ///
+    /// Not `Character.isLetter`, which is true of a mark that is only ever written above or
+    /// beside a letter. Such a mark on its own is a stray mark rather than a word, and is
+    /// meant to normalise to nothing so that it is passed over rather than joined onto its
+    /// neighbour.
+    private static func isLetter(_ character: Character) -> Bool {
+        guard let category = character.unicodeScalars.first?.properties.generalCategory else { return false }
+        return [
+            .uppercaseLetter, .lowercaseLetter, .titlecaseLetter, .modifierLetter, .otherLetter, .letterNumber
+        ].contains(category)
     }
 
     static func printedParts(_ word: String) -> Int {
@@ -196,9 +209,9 @@ public enum TranscriptAligner {
         let scalars = word.decomposedStringWithCanonicalMapping.unicodeScalars
             .filter { !Rules.shared.lifts($0) }
         let lifted = String(String.UnicodeScalarView(scalars)).precomposedStringWithCanonicalMapping
-        return String(lifted.map { character in
-            Rules.shared.foldedLetters[String(character)].flatMap(\.first) ?? character
-        })
+        return lifted
+            .map { character in Rules.shared.foldedLetters[String(character)] ?? String(character) }
+            .joined()
     }
 
     static func similarity(_ left: String, _ right: String) -> Double {

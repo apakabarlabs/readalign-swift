@@ -129,7 +129,7 @@ Two things live as data rather than as code, so that a port in another language 
 
 `Sources/ReadAlign/Resources/rules.yaml` holds every number the alignment is tuned to: the two bars, the price of a gap and of a bad pair, the shortest span a word can be found at, the letters the English weighting counts as vowels, the letters that carry their mark through the letter itself, and the five that decide how a word is held through the silence after it. Changing one of them changes every port, rather than leaving them quietly apart.
 
-There is a Python port at [readalign-python](https://github.com/apakabarlabs/readalign-python), which syncs both files from here. The two carry the same major and minor version, so equal numbers mean equal behaviour.
+There is a Python port at [readalign-python](https://github.com/apakabarlabs/readalign-python) and a Kotlin one at [readalign-kotlin](https://github.com/apakabarlabs/readalign-kotlin), both of which sync these files from here and hold their copies against this repository with a test of their own. All three carry the same major and minor version, so equal numbers mean equal behaviour.
 
 The cases live in YAML under `Tests/ReadAlignTests/Resources/`, one file per function, and every port is held to the same ones. What stays in Swift is only the runner.
 
@@ -147,10 +147,10 @@ Two things it does not hold, and cannot, because neither reaches the result:
 ## Install
 
 ```swift
-.package(url: "https://github.com/apakabarlabs/readalign-swift", from: "0.1.0")
+.package(url: "https://github.com/apakabarlabs/readalign-swift", from: "0.4.0")
 ```
 
-The API at 0.1.0 is not settled and may change without a major version, so pin an exact version if that matters to you.
+The API at 0.4.0 is not settled and may change without a major version, so pin an exact version if that matters to you.
 
 Our own apps take it from the checkout beside them instead, so a change here is in the app on the next build without a hop through a tag:
 

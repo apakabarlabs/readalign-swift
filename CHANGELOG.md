@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.4.0
+
+Nothing you call has to change. A token that is only a mark now normalises to nothing, as the documentation always said it did, so what comes back changes where such a token appears.
+
+### Fixed
+- A mark that is only ever written above or beside a letter is no longer a word in its own right. A Devanagari visarga standing alone used to normalise to itself and so be joined onto the word beside it, taking that word's stretch of the recording with it; it is now passed over, which is what a stray mark has always been documented to do. The letters of a word are unaffected: a mark attached to its letter is part of that letter as before.
+- A `folded_letters` entry longer than one character is honoured whole rather than cut to its first character. Every entry in the shared file is one character today, so nothing changes yet; adding a two-letter fold would otherwise have produced two answers across the ports from a file whose purpose is that they produce one.
+
+### Added
+- A Kotlin port, [readalign-kotlin](https://github.com/apakabarlabs/readalign-kotlin). The shared cases now pin where a language's letters are cut apart, which is not something a port may answer for itself: a word carrying a zero-width joiner and a word carrying a spacing mark each have a case of their own.
+
 ## 0.3.0
 
 Nothing you call has to change. What comes back changes wherever accents are involved, on either side — see Fixed.
