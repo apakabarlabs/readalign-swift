@@ -1,4 +1,5 @@
 [![Tests](https://github.com/apakabarlabs/readalign-swift/actions/workflows/tests.yml/badge.svg)](https://github.com/apakabarlabs/readalign-swift/actions/workflows/tests.yml)
+[![Documentation](https://github.com/apakabarlabs/readalign-swift/actions/workflows/documentation.yml/badge.svg)](https://apakabarlabs.github.io/readalign-swift/documentation/readalign/)
 # readalign-swift
 
 Lines a speech recogniser's output up against the text that was read, and says when each word of that text was spoken.
@@ -168,6 +169,11 @@ Our own apps take it from the checkout beside them instead, so a change here is 
 make test
 make lint
 ```
+
+## Documentation
+
+The [Swift-DocC API reference](https://apakabarlabs.github.io/readalign-swift/documentation/readalign/)
+is generated from the public API on every push to `main`.
 
 ## Lines of Code
 

@@ -1,4 +1,4 @@
-.PHONY: build test test-build lint lint-fix format clean install
+.PHONY: build test test-build docs lint lint-fix format clean install
 
 build:
 	swift build
@@ -8,6 +8,13 @@ test:
 
 test-build:
 	swift build --build-tests
+
+docs:
+	swift package --allow-writing-to-directory .build/docc generate-documentation \
+		--target ReadAlign --output-path .build/docc \
+		--warnings-as-errors \
+		--transform-for-static-hosting \
+		--hosting-base-path readalign-swift
 
 lint:
 	swiftlint --strict
