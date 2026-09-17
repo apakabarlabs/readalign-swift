@@ -63,7 +63,13 @@ It is asked with either side joined up as well, because a recogniser writes a hy
 
 ### Holding a word open through the silence after it
 
-The one call that needs the recording. A recogniser marks where a word stops being audible, not where the voice has finished with it, so a passage played to the mark stops a hair short of itself. Give `SilenceHold.held` the samples and the marks come back carried into the quiet, and never into the word that follows.
+One of the two calls that need the recording. A recogniser marks where a word stops being audible, not where the voice has finished with it, so a passage played to the mark stops a hair short of itself. Give `SilenceHold.held` the samples and the marks come back carried into the quiet, and never into the word that follows.
+
+### Cutting a recording into pieces
+
+The other. A recogniser given a long reading cuts it into windows of its own, and every runtime cuts differently: a forty-second reading handed whole to one and in fifteen-second windows to another is two different questions, and the answers cannot be held against each other. `Pieces.cuts` returns the ranges to ask in, cut at the pauses `Pieces.pauses` finds and overlapping so that no word falls on a seam. Where no pause offers itself the piece ends on length alone, and then there is no overlap to give.
+
+A pause is found against the threshold the recording sets for itself: quiet is what stands well below its quietest tenth. A reading with hardly any silence in it therefore offers no pause at all and is cut on length, because there nothing stands out from that tenth.
 
 ### Other languages
 
@@ -128,7 +134,7 @@ The same sharing happens inside a single match when several written words were h
 
 Two things live as data rather than as code, so that a port in another language reads them instead of holding its own copy.
 
-`Sources/ReadAlign/Resources/rules.yaml` holds every number the alignment is tuned to: the two bars, the price of a gap and of a bad pair, the shortest span a word can be found at, the letters the English weighting counts as vowels, the letters that carry their mark through the letter itself, the marks that join one consonant to the next, and the five that decide how a word is held through the silence after it. Changing one of them changes every port, rather than leaving them quietly apart.
+`Sources/ReadAlign/Resources/rules.yaml` holds every number the alignment is tuned to: the two bars, the price of a gap and of a bad pair, the shortest span a word can be found at, the letters the English weighting counts as vowels, the letters that carry their mark through the letter itself, the marks that join one consonant to the next, the five that decide how a word is held through the silence after it, and the four that decide where a recording is cut into pieces. Changing one of them changes every port, rather than leaving them quietly apart.
 
 Where a word is cut into letters is in there too, and it has to be. Every platform answers that question, and they answer it differently and at different vintages: one cuts a zero-width joiner away from the word it joins, another breaks a joined pair of consonants in two, and a third answers whatever the phone's operating system happens to know. A library whose whole claim is that three ports read one word cannot leave that to the platform, so the cutting is done here, by rules written down, and pinned letter by letter in the cases.
 

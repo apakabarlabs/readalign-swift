@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.6.0
+
+Nothing you call has to change. There is a new call for anyone who hands a long recording to a speech recogniser.
+
+### Added
+- `Pieces.cuts` says where to cut a recording into the pieces a recogniser is asked one at a time, and `Pieces.pauses` says where it is quiet long enough to cut. A recogniser handed a long reading cuts it into windows of its own, and every runtime cuts differently: one took fifteen-second windows and dropped the last line of a forty-second reading, while another was handed the same reading whole. Cut it here first and every side is asked the same question.
+- Four numbers in `rules.yaml` decide it: how long a piece may be, the earliest it may end, how long quiet has to last to count as a pause, and how close two marks of one word have to be for the overlap to say it once.
+
+### Notes
+- A reading with hardly any silence in it is cut on length alone. Quiet is measured against the quietest tenth of the recording itself, so where that tenth is already speech, no pause stands out from it.
+
 ## 0.5.0
 
 Nothing you call has to change. What comes back changes for Greek words ending in a capital sigma, and for any word whose letters the platform used to cut apart differently from the sibling ports.
