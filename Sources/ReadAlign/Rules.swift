@@ -26,6 +26,11 @@ public struct Rules: Codable, Sendable {
     public let speechFromLoudestShare: Double
     public let quietestSpeech: Double
 
+    public let pieceSeconds: TimeInterval
+    public let shortestPieceShare: Double
+    public let pauseSeconds: TimeInterval
+    public let sameMoment: TimeInterval
+
     enum CodingKeys: String, CodingKey {
         case matchThreshold = "match_threshold"
         case joinFloor = "join_floor"
@@ -49,6 +54,10 @@ public struct Rules: Codable, Sendable {
         case holdLimit = "hold_limit"
         case speechFromLoudestShare = "speech_from_loudest_share"
         case quietestSpeech = "quietest_speech"
+        case pieceSeconds = "piece_seconds"
+        case shortestPieceShare = "shortest_piece_share"
+        case pauseSeconds = "pause_seconds"
+        case sameMoment = "same_moment"
     }
 
     public static let shared: Rules = Embedded.getYAML(Bundle.module, path: "rules.yaml")

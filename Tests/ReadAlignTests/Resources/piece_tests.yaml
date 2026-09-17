@@ -1,0 +1,93 @@
+# Cutting a recording into the pieces a recogniser is asked one at a time.
+#
+# Every side has to cut the same reading the same way, so the cases say it in samples: a
+# port that agrees with these agrees with every other port, and one that drifts is red
+# here rather than a word short on one platform a month later.
+#
+# A case describes the recording rather than shipping one — stretches of a level and a
+# length, which every port builds into samples for itself — and then names what the cut
+# comes to, in samples, `[start, end)`. The rules are the shared ones: `piece_seconds`,
+# `shortest_piece_share` and `pause_seconds`.
+#
+# The quiet in these cases is a room rather than digital silence, because that is what a
+# recording holds and because the threshold is taken from the recording itself: the
+# quietest tenth of it is called the room, so a case whose quiet is too small a share of
+# it has no room to find, and every frame reads as quiet. That is not a flaw in the
+# cases; it is the same thing happening to a reading with hardly a pause in it.
+
+# Where the recording is quiet long enough that a cut takes no word in half. The middle
+# of each stretch of quiet, in samples.
+pauses:
+  - name: "a pause between two stretches of speech is found in its middle"
+    sample_rate: 1000
+    waveform:
+      - {level: 0.5, seconds: 1.0}
+      - {level: 0.001, seconds: 0.4}
+      - {level: 0.5, seconds: 1.0}
+    equals: [1200]
+  - name: "a stop inside a word is too short to cut in"
+    sample_rate: 1000
+    waveform:
+      - {level: 0.5, seconds: 1.0}
+      - {level: 0.001, seconds: 0.1}
+      - {level: 0.5, seconds: 0.5}
+      - {level: 0.001, seconds: 0.4}
+      - {level: 0.5, seconds: 1.0}
+    equals: [1800]
+  - name: "speech with no pause in it offers nowhere to cut"
+    sample_rate: 1000
+    waveform:
+      - {level: 0.5, seconds: 2.0}
+    equals: []
+  - name: "the quiet a recording ends in is a pause like any other"
+    sample_rate: 1000
+    waveform:
+      - {level: 0.5, seconds: 1.0}
+      - {level: 0.001, seconds: 0.5}
+    equals: [1250]
+  - name: "nothing but silence has no speech to be quiet between"
+    sample_rate: 1000
+    waveform:
+      - {level: 0.0, seconds: 1.0}
+    equals: []
+
+# The pieces themselves.
+cuts:
+  - name: "a recording shorter than a piece is asked whole"
+    sample_rate: 100
+    waveform:
+      - {level: 0.5, seconds: 8.0}
+    equals: [[0, 800]]
+  - name: "a recording exactly a piece long is asked whole"
+    sample_rate: 100
+    waveform:
+      - {level: 0.5, seconds: 12.0}
+    equals: [[0, 1200]]
+  - name: "a long recording with no pause is cut on length alone"
+    sample_rate: 100
+    waveform:
+      - {level: 0.5, seconds: 20.0}
+    equals: [[0, 1200], [1200, 2000]]
+  - name: "a pause late in the piece is where the cut falls"
+    sample_rate: 100
+    waveform:
+      - {level: 0.5, seconds: 8.0}
+      - {level: 0.001, seconds: 3.0}
+      - {level: 0.5, seconds: 9.0}
+    equals: [[0, 950], [950, 2000]]
+  - name: "a pause too early in the piece is not cut at, and not overlapped back to"
+    sample_rate: 100
+    waveform:
+      - {level: 0.5, seconds: 2.0}
+      - {level: 0.001, seconds: 3.0}
+      - {level: 0.5, seconds: 15.0}
+    equals: [[0, 1200], [1200, 2000]]
+  - name: "two pauses in one piece: the cut takes the later, the overlap the earlier"
+    sample_rate: 100
+    waveform:
+      - {level: 0.5, seconds: 6.0}
+      - {level: 0.001, seconds: 1.5}
+      - {level: 0.5, seconds: 2.0}
+      - {level: 0.001, seconds: 1.5}
+      - {level: 0.5, seconds: 7.0}
+    equals: [[0, 1025], [675, 1800]]

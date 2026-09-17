@@ -99,3 +99,25 @@ hold_limit: 0.6
 # something above zero, or everything measured against it is divided by nothing.
 speech_from_loudest_share: 0.5
 quietest_speech: 0.000001
+
+# Cutting a recording into pieces a recogniser is given one at a time.
+#
+# Every side has to cut the same reading the same way, or the same voice is answered
+# differently by each of them: a piece boundary changes what comes back near it, and
+# one runtime that cuts at fifteen seconds of its own while another is handed the whole
+# recording is two different questions asked of one model.
+#
+# Shorter than any runtime's own window, so that ours is the only cut ever made. A piece
+# may end early to land in a pause, but never earlier than half, or a reading is minced
+# into pieces too short to carry a line.
+piece_seconds: 12
+shortest_piece_share: 0.5
+
+# Quiet for this long is a pause a cut may fall in. Shorter than that is the stop before
+# a consonant, and cutting there takes a word in half.
+pause_seconds: 0.2
+
+# Each piece begins a pause earlier than the one before it ended, so every word is heard
+# whole by at least one piece. What the overlap then says twice is dropped by time and
+# text together: the same word, marked this close to the same moment, is one word.
+same_moment: 0.2
