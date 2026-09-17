@@ -1,5 +1,6 @@
 import Foundation
 import Testing
+
 @testable import ReadAlign
 
 struct LettersCase: Codable, CustomTestStringConvertible {
@@ -71,12 +72,18 @@ struct WordTests {
 
     @Test(arguments: file.printedParts)
     func countsPrintedPartsAsTheCorpusSays(partsCase: PrintedPartsCase) {
-        #expect(TranscriptAligner.printedParts(partsCase.word) == partsCase.parts, "\(partsCase.word)")
+        #expect(
+            TranscriptAligner.printedParts(partsCase.word) == partsCase.parts,
+            "\(partsCase.word)"
+        )
     }
 
     @Test(arguments: file.letters)
     func cutsAWordIntoLettersAsTheCorpusSays(lettersCase: LettersCase) {
-        #expect(TranscriptAligner.letters(lettersCase.word) == lettersCase.want, "\(lettersCase.word)")
+        #expect(
+            TranscriptAligner.letters(lettersCase.word) == lettersCase.want,
+            "\(lettersCase.word)"
+        )
     }
 
     @Test(arguments: file.normalize)

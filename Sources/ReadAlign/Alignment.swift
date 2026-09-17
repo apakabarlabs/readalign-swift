@@ -20,7 +20,9 @@ struct Alignment {
     }
 
     func straight(_ row: Int, _ column: Int) -> Double {
-        if equivalent?(expected[row], heard[column], row > 0 ? expected[row - 1] : nil) == true { return 1 }
+        if equivalent?(expected[row], heard[column], row > 0 ? expected[row - 1] : nil) == true {
+            return 1
+        }
         return worth(TranscriptAligner.similarity(expected[row], heard[column]), against: threshold)
     }
 
@@ -28,7 +30,9 @@ struct Alignment {
         let parts = heard[(column - span + 1)...column]
         guard joinable(parts), !expected[row].isEmpty else { return mismatchPenalty }
         let joined = parts.joined()
-        if equivalent?(expected[row], joined, row > 0 ? expected[row - 1] : nil) == true { return 1 }
+        if equivalent?(expected[row], joined, row > 0 ? expected[row - 1] : nil) == true {
+            return 1
+        }
         return worth(TranscriptAligner.similarity(expected[row], joined), against: joinThreshold)
     }
 
@@ -37,9 +41,13 @@ struct Alignment {
     }
 
     func joinedExpected(_ row: Int, _ column: Int) -> Double {
-        guard joinable(expected[(row - 1)...row]), !heard[column].isEmpty else { return mismatchPenalty }
+        guard joinable(expected[(row - 1)...row]), !heard[column].isEmpty else {
+            return mismatchPenalty
+        }
         let joined = expected[row - 1] + expected[row]
-        if equivalent?(joined, heard[column], row > 1 ? expected[row - Self.pair] : nil) == true { return 1 }
+        if equivalent?(joined, heard[column], row > 1 ? expected[row - Self.pair] : nil) == true {
+            return 1
+        }
         return worth(TranscriptAligner.similarity(joined, heard[column]), against: joinThreshold)
     }
 
@@ -49,7 +57,9 @@ struct Alignment {
         }
         let written = expected[row - 1] + expected[row]
         let said = heard[column - 1] + heard[column]
-        if equivalent?(written, said, row > 1 ? expected[row - Self.pair] : nil) == true { return 1 }
+        if equivalent?(written, said, row > 1 ? expected[row - Self.pair] : nil) == true {
+            return 1
+        }
         return worth(TranscriptAligner.similarity(written, said), against: joinThreshold)
     }
 
@@ -95,28 +105,33 @@ struct Alignment {
 
     func matches(in score: [[Double]]) -> [WordMatch] {
         var matches: [WordMatch] = []
-        var row = expected.count
-        var column = heard.count
+        var (row, column) = (expected.count, heard.count)
         while row > 0, column > 0 {
             let cell = score[row][column]
             let straight = straight(row - 1, column - 1)
             if cell == score[row - 1][column - 1] + straight {
                 if straight >= threshold {
-                    matches.append(WordMatch(expected: (row - 1)..<row, heard: (column - 1)..<column))
+                    matches.append(
+                        WordMatch(expected: (row - 1)..<row, heard: (column - 1)..<column)
+                    )
                 }
                 row -= 1
                 column -= 1
             } else if let span = (Self.pair...spans(forExpectedAt: row - 1)).first(where: { span in
                 column >= span
-                    && cell == score[row - 1][column - span] + joinedHeard(row - 1, column - 1, span: span)
+                    && cell == score[row - 1][column - span]
+                        + joinedHeard(row - 1, column - 1, span: span)
             }) {
                 if joinedHeard(row - 1, column - 1, span: span) >= joinThreshold {
-                    matches.append(WordMatch(expected: (row - 1)..<row, heard: (column - span)..<column))
+                    matches.append(
+                        WordMatch(expected: (row - 1)..<row, heard: (column - span)..<column)
+                    )
                 }
                 row -= 1
                 column -= span
             } else if row >= Self.pair, column >= Self.pair,
-                      cell == score[row - Self.pair][column - Self.pair] + joinedPair(row - 1, column - 1) {
+                cell == score[row - Self.pair][column - Self.pair] + joinedPair(row - 1, column - 1)
+            {
                 if joinedPair(row - 1, column - 1) >= joinThreshold {
                     let back = (row - Self.pair)..<row
                     matches.append(WordMatch(expected: back, heard: (column - Self.pair)..<column))
@@ -124,7 +139,8 @@ struct Alignment {
                 row -= Self.pair
                 column -= Self.pair
             } else if row >= Self.pair,
-                      cell == score[row - Self.pair][column - 1] + joinedExpected(row - 1, column - 1) {
+                cell == score[row - Self.pair][column - 1] + joinedExpected(row - 1, column - 1)
+            {
                 if joinedExpected(row - 1, column - 1) >= joinThreshold {
                     let back = (row - Self.pair)..<row
                     matches.append(WordMatch(expected: back, heard: (column - 1)..<column))

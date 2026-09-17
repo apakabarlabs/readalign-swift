@@ -63,7 +63,8 @@ public struct Rules: Codable, Sendable {
 
     public func lifts(_ scalar: Unicode.Scalar) -> Bool {
         guard let first = UInt32(liftedMarksFrom, radix: Self.hexadecimal),
-              let last = UInt32(liftedMarksTo, radix: Self.hexadecimal) else { return false }
+            let last = UInt32(liftedMarksTo, radix: Self.hexadecimal)
+        else { return false }
         return (first...last).contains(scalar.value)
     }
 }

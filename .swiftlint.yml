@@ -13,10 +13,17 @@ analyzer_rules:
   - unused_declaration
 
 disabled_rules:
+  # swift-format places the brace after a wrapped return type or condition on
+  # the following line. Requiring the opposite makes `format` and `lint`
+  # mutually destructive.
+  - opening_brace
   # Wants the opening brace on a line of its own, which is neither how Swift is
   # written nor what the default `opening_brace` rule asks for. The two cannot
   # both be satisfied.
   - contrasted_opening_brace
+  # Conflicts with `no_extension_access_modifier`; keep access on declarations,
+  # which also matches swift-format's default Swift style.
+  - extension_access_modifier
   # Want `internal` spelled out on everything that is already internal by default,
   # and a raw value on every enum case that does not need one.
   - explicit_acl

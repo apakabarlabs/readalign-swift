@@ -24,9 +24,10 @@ public struct EnglishSyllableWeighting: SpeechWeighting {
         }
         let spelled = String(letters)
         if letters.count >= Rules.shared.shortestWithASilentEnding,
-           spelled.hasSuffix(Rules.shared.silentEnding),
-           !spelled.hasSuffix(Rules.shared.silentEndingExceptAfter),
-           count > 1 {
+            spelled.hasSuffix(Rules.shared.silentEnding),
+            !spelled.hasSuffix(Rules.shared.silentEndingExceptAfter),
+            count > 1
+        {
             count -= 1
         }
         return max(count, lightest)

@@ -1,6 +1,7 @@
 import Foundation
 import SwiftEmbed
 import Testing
+
 @testable import ReadAlign
 
 enum Corpus {

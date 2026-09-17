@@ -1,5 +1,6 @@
 import Foundation
 import Testing
+
 @testable import ReadAlign
 
 struct Stretch: Codable {
@@ -84,7 +85,10 @@ struct HoldTests {
 
     @Test(arguments: file.speechLevel)
     func measuresHowLoudlyTheRecordingSpeaks(levelCase: SpeechLevelCase) {
-        #expect(levelCase.equals != nil || levelCase.atLeast != nil, "\(levelCase.name): pins nothing")
+        #expect(
+            levelCase.equals != nil || levelCase.atLeast != nil,
+            "\(levelCase.name): pins nothing"
+        )
 
         let level = SilenceHold.speechLevel(
             of: SilenceHold.energyFrames(of: levelCase.samples, sampleRate: levelCase.sampleRate)

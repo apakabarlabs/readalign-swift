@@ -45,7 +45,12 @@ public enum TranscriptAligner {
         guard !expected.isEmpty else { return [] }
         guard !heard.isEmpty else { return [] }
 
-        let pairs = match(expected: expected, heard: heard, weighting: weighting, equivalent: equivalent)
+        let pairs = match(
+            expected: expected,
+            heard: heard,
+            weighting: weighting,
+            equivalent: equivalent
+        )
         return fill(expected: expected, pairs: pairs, duration: duration, weighting: weighting)
     }
 
@@ -66,7 +71,9 @@ public enum TranscriptAligner {
             let end = heard[match.heard.upperBound - 1].end
             guard match.expected.count > 1 else {
                 result[match.expected.lowerBound] = RecognizedWord(
-                    text: heard[match.heard.lowerBound].text, start: start, end: end
+                    text: heard[match.heard.lowerBound].text,
+                    start: start,
+                    end: end
                 )
                 return
             }
@@ -76,7 +83,9 @@ public enum TranscriptAligner {
             for (index, weight) in zip(match.expected, weights) {
                 let length = (end - start) * weight / total
                 result[index] = RecognizedWord(
-                    text: heard[match.heard.lowerBound].text, start: cursor, end: cursor + length
+                    text: heard[match.heard.lowerBound].text,
+                    start: cursor,
+                    end: cursor + length
                 )
                 cursor += length
             }
@@ -127,13 +136,14 @@ public enum TranscriptAligner {
             var runFinish = runEnd < timings.count ? timings[runEnd]?.start ?? duration : duration
 
             if runFinish - runStart < roomEnough * Double(runEnd - index),
-               let host = swallower(
-                   of: index..<runEnd,
-                   in: timings,
-                   expected: expected,
-                   weighting: weighting
-               ),
-               let stretch = timings[host] {
+                let host = swallower(
+                    of: index..<runEnd,
+                    in: timings,
+                    expected: expected,
+                    weighting: weighting
+                ),
+                let stretch = timings[host]
+            {
                 if host < index {
                     first = host
                     runStart = stretch.start
@@ -178,7 +188,10 @@ public enum TranscriptAligner {
         }
     }
 
-    private static func speechWeight(of word: String, using weighting: any SpeechWeighting) -> Double {
+    private static func speechWeight(
+        of word: String,
+        using weighting: any SpeechWeighting
+    ) -> Double {
         let weight = weighting.weight(of: word)
         let lightest = Rules.shared.lightestWord
         return weight.isFinite ? max(weight, lightest) : lightest
@@ -211,7 +224,9 @@ public enum TranscriptAligner {
 
     /// Whether this belongs to the letter being read rather than starting the next one.
     private static func joinsOn(_ scalar: Unicode.Scalar, after last: Unicode.Scalar) -> Bool {
-        if isMark(scalar) || scalar == zeroWidthNonJoiner || scalar == zeroWidthJoiner { return true }
+        if isMark(scalar) || scalar == zeroWidthNonJoiner || scalar == zeroWidthJoiner {
+            return true
+        }
         return Rules.shared.joins(last) && scalar.properties.isAlphabetic
     }
 
@@ -258,9 +273,12 @@ public enum TranscriptAligner {
     /// meant to normalise to nothing so that it is passed over rather than joined onto its
     /// neighbour.
     private static func isLetter(_ cluster: String) -> Bool {
-        guard let category = cluster.unicodeScalars.first?.properties.generalCategory else { return false }
+        guard let category = cluster.unicodeScalars.first?.properties.generalCategory else {
+            return false
+        }
         return [
-            .uppercaseLetter, .lowercaseLetter, .titlecaseLetter, .modifierLetter, .otherLetter, .letterNumber
+            .uppercaseLetter, .lowercaseLetter, .titlecaseLetter, .modifierLetter, .otherLetter,
+            .letterNumber
         ].contains(category)
     }
 
@@ -272,7 +290,8 @@ public enum TranscriptAligner {
         let scalars = word.decomposedStringWithCanonicalMapping.unicodeScalars
             .filter { !Rules.shared.lifts($0) }
         let lifted = String(String.UnicodeScalarView(scalars)).precomposedStringWithCanonicalMapping
-        return lifted
+        return
+            lifted
             .map { character in Rules.shared.foldedLetters[String(character)] ?? String(character) }
             .joined()
     }
@@ -295,7 +314,8 @@ public enum TranscriptAligner {
         for row in 1...left.count {
             current[0] = row
             for column in 1...right.count {
-                let substitution = previous[column - 1] + (left[row - 1] == right[column - 1] ? 0 : 1)
+                let substitution =
+                    previous[column - 1] + (left[row - 1] == right[column - 1] ? 0 : 1)
                 current[column] = min(substitution, previous[column] + 1, current[column - 1] + 1)
             }
             swap(&previous, &current)
