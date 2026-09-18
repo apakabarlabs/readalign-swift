@@ -106,41 +106,55 @@ public enum Pieces {
             let placed = words.map { word in
                 RecognizedWord(text: word.text, start: word.start + offset, end: word.end + offset)
             }
-            let saidTwice = saidAlready(reading, placed, from: offset, upTo: coveredTo)
-            reading += placed.dropFirst(saidTwice)
+            let seam = agreement(reading, placed, from: offset, upTo: coveredTo)
+            reading.removeLast(seam.keptAfterIt)
+            reading += placed.dropFirst(seam.comingUpToIt)
             coveredTo = Double(piece.upperBound) / sampleRate
         }
         return reading
     }
 
-    /// How many of the coming piece's first words the piece before it has already said.
+    /// Where the two pieces stop saying the same thing: what comes off each side of a seam.
+    struct Seam {
+        /// Words to take off the end of the reading so far.
+        let keptAfterIt: Int
+        /// Words to take off the front of the coming piece.
+        let comingUpToIt: Int
+    }
+
+    /// The longest run the two pieces say alike in the ground they both cover.
     ///
-    /// Only the words that fall in the ground both pieces cover can be a second copy, so
-    /// the search stops where the piece before ended: a word the reading genuinely says
-    /// twice, further along, is out of reach of this and stays.
+    /// Only words inside that ground can be a second copy, so the search is held to it: a
+    /// word the reading genuinely says twice, further along, is out of reach and stays.
     ///
-    /// The run is the longest the two say alike, found anywhere inside the overlap rather
-    /// than at its edges: a recogniser drops or invents a word at the edge of what it was
-    /// given — one piece ended "...by time decease we" where the other heard no "we" — and
-    /// a run pinned to the edges would find nothing and leave the whole overlap said twice.
-    /// A run of one word is taken only when it is the whole of what the coming piece says
-    /// in the overlap, or a word as common as "the" would pair with itself by chance.
-    static func saidAlready(
+    /// The run is looked for anywhere inside the overlap rather than at its edges, because
+    /// a recogniser drops or invents a word at the edge of what it was given — one piece
+    /// ended "...by time decease we" where the other heard no "we" — and a run pinned to
+    /// the edges would find nothing and leave the whole overlap said twice. A run of one
+    /// word is taken only when it is the whole of what the coming piece says in the
+    /// overlap, or a word as common as "the" would pair with itself by chance.
+    ///
+    /// Past the run the coming piece is believed and the piece before it is not: they
+    /// cover the same seconds there, and the one that goes on past them heard them with
+    /// what follows while the other was hearing the last of what it was given.
+    static func agreement(
         _ kept: [RecognizedWord],
         _ coming: [RecognizedWord],
         from overlapFrom: Double,
         upTo coveredTo: Double
-    ) -> Int {
+    ) -> Seam {
+        let nothing = Seam(keptAfterIt: 0, comingUpToIt: 0)
         let tail = kept.drop { word in word.start < overlapFrom }.map { word in
             TranscriptAligner.normalize(word.text)
         }
         let head = coming.prefix { word in word.start < coveredTo }.map { word in
             TranscriptAligner.normalize(word.text)
         }
-        guard !tail.isEmpty, !head.isEmpty else { return 0 }
+        guard !tail.isEmpty, !head.isEmpty else { return nothing }
 
         var longest = 0
-        var endsAt = 0
+        var endsInTail = 0
+        var endsInHead = 0
         for first in tail.indices {
             for second in head.indices {
                 var run = 0
@@ -150,12 +164,13 @@ public enum Pieces {
                 }
                 if run > longest {
                     longest = run
-                    endsAt = second + run
+                    endsInTail = first + run
+                    endsInHead = second + run
                 }
             }
         }
-        guard longest > 1 || longest == head.count else { return 0 }
-        return endsAt
+        guard longest > 1 || longest == head.count else { return nothing }
+        return Seam(keptAfterIt: tail.count - endsInTail, comingUpToIt: endsInHead)
     }
 
     /// What one piece comes back as, asking again with less of its tail while nothing comes.

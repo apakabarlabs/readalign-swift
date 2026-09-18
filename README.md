@@ -77,6 +77,8 @@ By the text and not by the clock, because the clock is the one thing two builds 
 
 The run is looked for anywhere inside the overlap rather than at its edges, because a recogniser drops or invents a word at the edge of what it was given: one piece ended `...by time decease we` where the other heard no `we` at all, and a run pinned to the edges would have found nothing and left the whole overlap said twice. A run of a single word counts only when it is the whole of what the coming piece says in the overlap, or a word as common as `the` would pair with itself by chance.
 
+Past the run the coming piece is believed and the piece before it is not. They cover the same seconds there, and the one that goes on past them heard them with what follows, while the other was hearing the last of what it was given — which is where a recogniser invents. So `we` above does not reach the reading at all.
+
 ### When the recogniser answers nothing at all
 
 Parakeet answers some pieces of ordinary speech with no words at all. Whether it does turns on where the piece starts and how long it is together rather than on the speech in it: the mel statistics are taken over the piece, so its length moves them, and past some edge the decoder predicts blank at every frame. Handing over a little less of the tail moves the piece off that edge.

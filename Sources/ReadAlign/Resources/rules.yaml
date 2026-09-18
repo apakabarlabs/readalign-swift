@@ -127,7 +127,10 @@ pause_seconds: 0.2
 # rather than at its very edges: a recogniser drops or invents a word at the edge of what
 # it was given — one piece ended "...by time decease we" where the other heard no "we" at
 # all — and a run pinned to the edges would then find nothing and leave the whole overlap
-# said twice. There is no number here for how much has to agree.
+# said twice. Past the run the coming piece is believed and the piece before it is not:
+# they cover the same seconds there, and the one that goes on past them heard them with
+# what follows while the other was hearing the last of what it was given. There is no
+# number here at all.
 
 # Asking again when the recogniser answers nothing at all.
 #

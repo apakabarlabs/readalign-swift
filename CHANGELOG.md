@@ -7,6 +7,7 @@
 ### Changed
 - The overlap is settled by the longest run the two pieces say alike inside it: everything the coming piece says up to the end of that run comes off. Before, a word was a second copy if it was marked within `same_moment` of one already kept and spelled the same. The clock is the one thing two builds of one model do not share: measured on a sonnet, the same word came back 0.20 s apart in two pieces of one recording, just outside the bar, and a different runtime puts it somewhere else again. So one build kept the word twice and another kept it once, from the same recording and the same cut. The words agree where the marks do not.
 - The run is looked for anywhere inside the overlap rather than at its edges, because a recogniser drops or invents a word at the edge of what it was given: one piece ended `...by time decease we` where the other heard no `we` at all, and a run pinned to the edges finds nothing and leaves the whole overlap said twice. A run of a single word counts only when it is the whole of what the coming piece says in the overlap.
+- Past the run the coming piece is believed and the piece before it is not: they cover the same seconds there, and the one that goes on past them heard them with what follows while the other was hearing the last of what it was given. So a word invented at the edge of a piece now goes rather than standing in the reading.
 - A word the reading genuinely says twice at a seam is still kept twice, and pieces that disagree about the overlap still keep what each of them said.
 
 ### Removed
