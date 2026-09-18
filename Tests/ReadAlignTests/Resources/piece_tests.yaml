@@ -170,6 +170,21 @@ joins:
       - {text: "live", start: 1.05, end: 1.15}
       - {text: "live", start: 1.25, end: 1.35}
       - {text: "remembered", start: 1.75, end: 2.0}
+  - name: "a word invented at the very edge of a piece does not leave the overlap said twice"
+    sample_rate: 1000
+    pieces: [[0, 1500], [1000, 2500]]
+    heard:
+      - - {text: "time", start: 1.05, end: 1.2}
+        - {text: "decease", start: 1.25, end: 1.4}
+        - {text: "we", start: 1.45, end: 1.49}
+      - - {text: "time", start: 0.06, end: 0.21}
+        - {text: "decease", start: 0.26, end: 0.41}
+        - {text: "his", start: 0.75, end: 1.0}
+    equals:
+      - {text: "time", start: 1.05, end: 1.2}
+      - {text: "decease", start: 1.25, end: 1.4}
+      - {text: "we", start: 1.45, end: 1.49}
+      - {text: "his", start: 1.75, end: 2.0}
   - name: "pieces that disagree about the overlap keep what each of them said"
     sample_rate: 1000
     pieces: [[0, 1500], [1000, 2500]]

@@ -76,10 +76,10 @@ public enum Pieces {
     /// One transcript out of what each piece came back with.
     ///
     /// The pieces overlap, so the words at a seam arrive twice, and the second copy is
-    /// dropped by the text: the longest run of words the piece before already said is
-    /// taken off the front of the one coming. Placed where it falls in the whole
-    /// recording, so a caller hands over what it was given piece by piece and gets the
-    /// reading back.
+    /// dropped by the text: the longest run the two pieces say alike inside the overlap
+    /// is found, and everything the coming piece says up to the end of it comes off.
+    /// Placed where it falls in the whole recording, so a caller hands over what it was
+    /// given piece by piece and gets the reading back.
     ///
     /// By the text and not by the clock, because the clock is the one thing two builds of
     /// one model do not share: the same word decoded in two pieces comes back a fifth of a
@@ -106,7 +106,8 @@ public enum Pieces {
             let placed = words.map { word in
                 RecognizedWord(text: word.text, start: word.start + offset, end: word.end + offset)
             }
-            reading += placed.dropFirst(saidAlready(reading, placed, upTo: coveredTo))
+            let saidTwice = saidAlready(reading, placed, from: offset, upTo: coveredTo)
+            reading += placed.dropFirst(saidTwice)
             coveredTo = Double(piece.upperBound) / sampleRate
         }
         return reading
@@ -117,20 +118,44 @@ public enum Pieces {
     /// Only the words that fall in the ground both pieces cover can be a second copy, so
     /// the search stops where the piece before ended: a word the reading genuinely says
     /// twice, further along, is out of reach of this and stays.
+    ///
+    /// The run is the longest the two say alike, found anywhere inside the overlap rather
+    /// than at its edges: a recogniser drops or invents a word at the edge of what it was
+    /// given — one piece ended "...by time decease we" where the other heard no "we" — and
+    /// a run pinned to the edges would find nothing and leave the whole overlap said twice.
+    /// A run of one word is taken only when it is the whole of what the coming piece says
+    /// in the overlap, or a word as common as "the" would pair with itself by chance.
     static func saidAlready(
         _ kept: [RecognizedWord],
         _ coming: [RecognizedWord],
+        from overlapFrom: Double,
         upTo coveredTo: Double
     ) -> Int {
-        let reach = min(coming.prefix { word in word.start < coveredTo }.count, kept.count)
-        var said = 0
-        for length in stride(from: 1, through: reach, by: 1) {
-            let alike = zip(kept.suffix(length), coming.prefix(length)).allSatisfy { earlier, later in
-                TranscriptAligner.normalize(earlier.text) == TranscriptAligner.normalize(later.text)
-            }
-            if alike { said = length }
+        let tail = kept.drop { word in word.start < overlapFrom }.map { word in
+            TranscriptAligner.normalize(word.text)
         }
-        return said
+        let head = coming.prefix { word in word.start < coveredTo }.map { word in
+            TranscriptAligner.normalize(word.text)
+        }
+        guard !tail.isEmpty, !head.isEmpty else { return 0 }
+
+        var longest = 0
+        var endsAt = 0
+        for first in tail.indices {
+            for second in head.indices {
+                var run = 0
+                while first + run < tail.count, second + run < head.count,
+                      tail[first + run] == head[second + run] {
+                    run += 1
+                }
+                if run > longest {
+                    longest = run
+                    endsAt = second + run
+                }
+            }
+        }
+        guard longest > 1 || longest == head.count else { return 0 }
+        return endsAt
     }
 
     /// What one piece comes back as, asking again with less of its tail while nothing comes.
