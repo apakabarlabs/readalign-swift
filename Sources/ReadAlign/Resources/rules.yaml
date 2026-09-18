@@ -118,9 +118,10 @@ shortest_piece_share: 0.5
 pause_seconds: 0.2
 
 # Each piece begins a pause earlier than the one before it ended, so every word is heard
-# whole by at least one piece. What the overlap then says twice is dropped by time and
-# text together: the same word, marked this close to the same moment, is one word.
-same_moment: 0.2
+# whole by at least one piece. What the overlap says twice is dropped by the text alone:
+# the longest run of words the piece before already said comes off the front of the one
+# coming, searched only as far as the ground both pieces cover. There is no number here
+# because the clock is the one thing two builds of one model do not share.
 
 # Asking again when the recogniser answers nothing at all.
 #

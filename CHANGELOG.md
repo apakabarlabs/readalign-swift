@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.9.0
+
+`Pieces.joined` drops the second copy of a seam word by the text alone. Nothing you call changes; what comes back does, and `same_moment` is gone from `rules.yaml`.
+
+### Changed
+- The overlap is settled by the longest run of words the piece before already said, taken off the front of the one coming and searched only as far as the ground both pieces cover. Before, a word was a second copy if it was marked within `same_moment` of one already kept and spelled the same. The clock is the one thing two builds of one model do not share: measured on a sonnet, the same word came back 0.20 s apart in two pieces of one recording, just outside the bar, and a different runtime puts it somewhere else again. So one build kept the word twice and another kept it once, from the same recording and the same cut. The words agree where the marks do not.
+- A word the reading genuinely says twice at a seam is still kept twice, and pieces that disagree about the overlap still keep what each of them said.
+
+### Removed
+- `same_moment` from `rules.yaml` and `Rules`. Nothing reads it now, and a number left behind reads as one the code obeys.
+
 ## 0.8.1
 
 ### Changed

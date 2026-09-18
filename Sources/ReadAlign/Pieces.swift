@@ -76,9 +76,16 @@ public enum Pieces {
     /// One transcript out of what each piece came back with.
     ///
     /// The pieces overlap, so the words at a seam arrive twice, and the second copy is
-    /// dropped by time and text together: the same word marked within `same_moment` of
-    /// one already kept is one word. Placed where it falls in the whole recording, so a
-    /// caller hands over what it was given piece by piece and gets the reading back.
+    /// dropped by the text: the longest run of words the piece before already said is
+    /// taken off the front of the one coming. Placed where it falls in the whole
+    /// recording, so a caller hands over what it was given piece by piece and gets the
+    /// reading back.
+    ///
+    /// By the text and not by the clock, because the clock is the one thing two builds of
+    /// one model do not share: the same word decoded in two pieces comes back a fifth of a
+    /// second apart on one runtime and differently again on the next, so a rule that asks
+    /// how close two marks are decides differently on each of them. The words agree where
+    /// the marks do not.
     ///
     /// A piece the recogniser had nothing to say about is an answer, not a failure: a
     /// stretch of silence is transcribed as no words at all. A count of transcripts that
@@ -93,20 +100,37 @@ public enum Pieces {
             throw PiecesError.unevenPieces(heard: heard.count, pieces: pieces.count)
         }
         var reading: [RecognizedWord] = []
+        var coveredTo = 0.0
         for (words, piece) in zip(heard, pieces) {
             let offset = Double(piece.lowerBound) / sampleRate
-            for word in words {
-                let placed = RecognizedWord(
-                    text: word.text,
-                    start: word.start + offset,
-                    end: word.end + offset
-                )
-                if !reading.contains(where: { sameWord($0, placed) }) {
-                    reading.append(placed)
-                }
+            let placed = words.map { word in
+                RecognizedWord(text: word.text, start: word.start + offset, end: word.end + offset)
             }
+            reading += placed.dropFirst(saidAlready(reading, placed, upTo: coveredTo))
+            coveredTo = Double(piece.upperBound) / sampleRate
         }
         return reading
+    }
+
+    /// How many of the coming piece's first words the piece before it has already said.
+    ///
+    /// Only the words that fall in the ground both pieces cover can be a second copy, so
+    /// the search stops where the piece before ended: a word the reading genuinely says
+    /// twice, further along, is out of reach of this and stays.
+    static func saidAlready(
+        _ kept: [RecognizedWord],
+        _ coming: [RecognizedWord],
+        upTo coveredTo: Double
+    ) -> Int {
+        let reach = min(coming.prefix { word in word.start < coveredTo }.count, kept.count)
+        var said = 0
+        for length in stride(from: 1, through: reach, by: 1) {
+            let alike = zip(kept.suffix(length), coming.prefix(length)).allSatisfy { earlier, later in
+                TranscriptAligner.normalize(earlier.text) == TranscriptAligner.normalize(later.text)
+            }
+            if alike { said = length }
+        }
+        return said
     }
 
     /// What one piece comes back as, asking again with less of its tail while nothing comes.
@@ -139,11 +163,6 @@ public enum Pieces {
             if !again.isEmpty { return again }
         }
         return words
-    }
-
-    static func sameWord(_ kept: RecognizedWord, _ word: RecognizedWord) -> Bool {
-        abs(kept.start - word.start) < Rules.shared.sameMoment
-            && TranscriptAligner.normalize(kept.text) == TranscriptAligner.normalize(word.text)
     }
 }
 
