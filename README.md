@@ -1,6 +1,7 @@
+# readalign-swift
+
 [![Tests](https://github.com/apakabarlabs/readalign-swift/actions/workflows/tests.yml/badge.svg)](https://github.com/apakabarlabs/readalign-swift/actions/workflows/tests.yml)
 [![Documentation](https://github.com/apakabarlabs/readalign-swift/actions/workflows/documentation.yml/badge.svg)](https://apakabarlabs.github.io/readalign-swift/documentation/readalign/)
-# readalign-swift
 
 Lines a speech recogniser's output up against the text that was read, and says when each word of that text was spoken.
 
@@ -178,23 +179,22 @@ Two things it does not hold, and cannot, because neither reaches the result:
 ## Install
 
 ```swift
-.package(url: "https://github.com/apakabarlabs/readalign-swift", from: "0.5.0")
+.package(url: "https://github.com/apakabarlabs/readalign-swift", from: "0.12.2")
 ```
 
-The API at 0.5.0 is not settled and may change without a major version, so pin an exact version if that matters to you.
-
-Our own apps take it from the checkout beside them instead, so a change here is in the app on the next build without a hop through a tag:
-
-```swift
-.package(path: "../../readalign-swift")
-```
+Before 1.0, a minor release may change the API. Pin an exact version when that matters to you.
 
 ## Develop
 
 ```bash
-make test
-make lint
+make test-build  # compile the package and tests
+make test        # run the shared corpus and Swift-specific tests
+make lint        # commentcensor and SwiftLint
+make docs        # build the DocC reference with warnings as errors
+make build       # run every check and build the package
 ```
+
+Releases are published by the repository's [Release workflow](https://github.com/apakabarlabs/readalign-swift/actions/workflows/release.yml), after it repeats the complete build.
 
 ## Documentation
 

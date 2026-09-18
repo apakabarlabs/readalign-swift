@@ -1,7 +1,4 @@
 struct Alignment {
-    /// Two rows or columns of the table, which is what a join looks back at. Not a
-    /// tuned value: a pair is two by arithmetic. How far a join may reach on the
-    /// heard side is `join_span` in the rules.
     static let pair = 2
 
     let expected: [String]

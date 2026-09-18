@@ -8,7 +8,6 @@ import Foundation
 /// windows to another is two different questions, and the answers cannot be held against
 /// each other. So the cut is made here, by rule, before any of them is asked.
 public enum Pieces {
-    /// A cut goes in the middle of the quiet, as far from the word on either side as it gets.
     private static let halves = 2
 
     /// Where the recording is quiet for long enough that a cut there takes no word in half.
@@ -19,9 +18,6 @@ public enum Pieces {
         let frames = SilenceHold.energyFrames(of: samples, sampleRate: sampleRate)
         guard !frames.isEmpty else { return [] }
         let threshold = SilenceHold.speechThreshold(of: frames)
-        // Quiet is only quiet between speech. Where nothing stands above the threshold
-        // there is no voice to pause, and the whole recording would otherwise read as one
-        // long pause and offer its own middle as a place to cut.
         guard frames.contains(where: { $0 >= threshold }) else { return [] }
         let eachFrame = Rules.shared.frameSeconds
         let quietEnough = max(Int(Rules.shared.pauseSeconds / eachFrame), 1)
@@ -68,9 +64,6 @@ public enum Pieces {
         while samples.count - start > longest {
             let cut = marks.last { $0 > start + shortest && $0 < start + longest } ?? start + longest
             pieces.append(start ..< cut)
-            // One pause back, but never back past half a piece: the overlap is there to
-            // carry the words at the seam, and a pause near the start of this piece would
-            // hand the next one almost the same range, over and over.
             start = marks.last { $0 < cut && $0 >= start + shortest } ?? cut
         }
         pieces.append(start ..< samples.count)
@@ -118,29 +111,11 @@ public enum Pieces {
         return reading
     }
 
-    /// Where the two pieces stop saying the same thing: what comes off each side of a seam.
     struct Seam {
-        /// Words to take off the end of the reading so far.
         let keptAfterIt: Int
-        /// Words to take off the front of the coming piece.
         let comingUpToIt: Int
     }
 
-    /// The longest run the two pieces say alike in the ground they both cover.
-    ///
-    /// Only words inside that ground can be a second copy, so the search is held to it: a
-    /// word the reading genuinely says twice, further along, is out of reach and stays.
-    ///
-    /// The run is looked for anywhere inside the overlap rather than at its edges, because
-    /// a recogniser drops or invents a word at the edge of what it was given — one piece
-    /// ended "...by time decease we" where the other heard no "we" — and a run pinned to
-    /// the edges would find nothing and leave the whole overlap said twice. A run of one
-    /// word is taken only when it is the whole of what the coming piece says in the
-    /// overlap, or a word as common as "the" would pair with itself by chance.
-    ///
-    /// Past the run the coming piece is believed and the piece before it is not: they
-    /// cover the same seconds there, and the one that goes on past them heard them with
-    /// what follows while the other was hearing the last of what it was given.
     static func agreement(
         _ kept: [RecognizedWord],
         _ coming: [RecognizedWord],

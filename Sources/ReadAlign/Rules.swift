@@ -64,7 +64,6 @@ public struct Rules: Codable, Sendable {
 
     public static let shared: Rules = Embedded.getYAML(Bundle.module, path: "rules.yaml")
 
-    /// The marks are written the way Unicode writes them, so they are read that way.
     static let hexadecimal = 16
 
     /// Whether this mark writes one consonant joined to the next, making them one letter.

@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.12.2
+
+No runtime changes. The repository now checks comments and the complete build in CI, publishes releases through one workflow, and points installation at the current version.
+
 ## 0.12.1
 
 ### Fixed

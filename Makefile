@@ -1,7 +1,24 @@
-.PHONY: build test test-build docs lint lint-fix format clean install
+COMMENTCENSOR_VERSION ?= v0.3.2
+COMMENTCENSOR_ENV = .build/commentcensor
+COMMENTCENSOR = $(COMMENTCENSOR_ENV)/bin/commentcensor
 
-build:
-	swift build
+.DEFAULT_GOAL := build
+
+.PHONY: install-tools format comments lint test-build test docs build clean install
+
+install-tools:
+	brew install swiftlint swift-format
+	python3 -m venv $(COMMENTCENSOR_ENV)
+	$(COMMENTCENSOR_ENV)/bin/pip install --quiet --upgrade git+https://github.com/botforge-pro/commentcensor.git@$(COMMENTCENSOR_VERSION)
+
+format:
+	swift-format -i -r Sources Tests
+
+comments:
+	$(COMMENTCENSOR) .
+
+lint: comments
+	swiftlint --strict
 
 test:
 	swift test
@@ -16,18 +33,15 @@ docs:
 		--transform-for-static-hosting \
 		--hosting-base-path readalign-swift
 
-lint:
-	swiftlint --strict
-
 lint-fix:
 	swiftlint --fix
 
-format:
-	swift-format -i -r Sources Tests
+build: lint test-build test docs
+	swift build
 
 clean:
 	swift package clean
 	rm -rf .build
 
 install:
-	brew install swiftlint swift-format
+	$(MAKE) install-tools

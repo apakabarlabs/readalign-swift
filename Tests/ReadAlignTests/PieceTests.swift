@@ -117,8 +117,6 @@ struct PieceTests {
         #expect(pieces.first?.lowerBound == 0, "\(cutCase.name): starts at \(pieces.first?.lowerBound ?? -1)")
         #expect(pieces.last?.upperBound == cutCase.samples.count, "\(cutCase.name): ends short")
         for (earlier, later) in zip(pieces, pieces.dropFirst()) {
-            // Overlap where a pause allows it, but never a gap: a sample no piece holds is
-            // a word no recogniser is ever asked about.
             #expect(later.lowerBound <= earlier.upperBound, "\(cutCase.name): a gap between pieces")
             #expect(later.lowerBound > earlier.lowerBound, "\(cutCase.name): a piece that goes nowhere")
         }
@@ -170,17 +168,15 @@ struct PieceTests {
     @Test
     func asksAgainWithLessOfTheTailUntilSomethingComesBack() async {
         let piece = Self.piece(ofSeconds: 10)
-        // Says its word once three tenths of a second have come off the tail.
-        let speaks = piece.count - Int(0.3 * Self.sampleRate)
+        let speaksAfterThreeTenthsTrim = piece.count - Int(0.3 * Self.sampleRate)
         var asked: [Int] = []
 
         let words = await Pieces.heard(of: piece, sampleRate: Self.sampleRate) { given in
             asked.append(given.count)
-            return given.count <= speaks ? Self.oneWord : []
+            return given.count <= speaksAfterThreeTenthsTrim ? Self.oneWord : []
         }
 
         #expect(words == Self.oneWord)
-        // The whole piece, then one trim at a time until the third of them answers.
         #expect(asked == [piece.count, piece.count - 1_600, piece.count - 3_200, piece.count - 4_800])
     }
 

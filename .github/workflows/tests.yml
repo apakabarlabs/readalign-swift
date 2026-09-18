@@ -22,14 +22,8 @@ jobs:
     - name: Swift version
       run: swift --version
 
-    - name: Install SwiftLint
-      run: brew install swiftlint
-
-    - name: Lint
-      run: make lint
+    - name: Install tools
+      run: make install-tools
 
     - name: Build
-      run: make test-build
-
-    - name: Run tests
-      run: make test
+      run: make build

@@ -197,17 +197,10 @@ public enum TranscriptAligner {
         return weight.isFinite ? max(weight, lightest) : lightest
     }
 
-    /// The letters of a word as a reader sees them, lowercased and brought to one spelling.
     static func letters(_ word: String) -> [String] {
         clusters(lowercased(word.precomposedStringWithCanonicalMapping)).filter(isLetter)
     }
 
-    /// The pieces of text a reader sees as one character each.
-    ///
-    /// Cut by the rules this library shares rather than by whatever the platform carries,
-    /// because every platform carries a different answer and a different vintage of it: one
-    /// cuts a zero-width joiner away from the word it joins, another breaks a joined pair of
-    /// consonants in two. Sharing the rules is what keeps the ports reading one word.
     static func clusters(_ word: String) -> [String] {
         var found: [String] = []
         var letter = String.UnicodeScalarView()
@@ -222,7 +215,6 @@ public enum TranscriptAligner {
         return found
     }
 
-    /// Whether this belongs to the letter being read rather than starting the next one.
     private static func joinsOn(_ scalar: Unicode.Scalar, after last: Unicode.Scalar) -> Bool {
         if isMark(scalar) || scalar == zeroWidthNonJoiner || scalar == zeroWidthJoiner {
             return true
@@ -230,24 +222,13 @@ public enum TranscriptAligner {
         return Rules.shared.joins(last) && scalar.properties.isAlphabetic
     }
 
-    /// A mark written above, below or beside a letter, which belongs to that letter.
     private static func isMark(_ scalar: Unicode.Scalar) -> Bool {
         [.nonspacingMark, .enclosingMark, .spacingMark].contains(scalar.properties.generalCategory)
     }
 
-    /// Written inside a word to keep two letters from joining up, or to make them.
     private static let zeroWidthNonJoiner: Unicode.Scalar = "\u{200C}"
     private static let zeroWidthJoiner: Unicode.Scalar = "\u{200D}"
 
-    /// Lowercased, including the rule that a sigma ending a word is written its own way.
-    ///
-    /// `lowercased()` writes every sigma the same, and the libraries this one shares its
-    /// cases with do not, so a Greek word ending in a capital sigma came back spelled a way
-    /// they would not find it by.
-    ///
-    /// The rule asks whether a cased letter stands before it and none after. Between two
-    /// letters of one word that is the whole of it; the characters Unicode lets the rule
-    /// look past do not appear inside a word.
     private static func lowercased(_ word: String) -> String {
         let characters = Array(word)
         func isCased(_ index: Int) -> Bool {
@@ -266,12 +247,6 @@ public enum TranscriptAligner {
         letters(word).joined()
     }
 
-    /// A letter, or a number written as letters are: a roman numeral is read aloud as a word.
-    ///
-    /// Not `Character.isLetter`, which is true of a mark that is only ever written above or
-    /// beside a letter. Such a mark on its own is a stray mark rather than a word, and is
-    /// meant to normalise to nothing so that it is passed over rather than joined onto its
-    /// neighbour.
     private static func isLetter(_ cluster: String) -> Bool {
         guard let category = cluster.unicodeScalars.first?.properties.generalCategory else {
             return false

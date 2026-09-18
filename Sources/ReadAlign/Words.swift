@@ -8,10 +8,8 @@ import Foundation
 /// returns `beauty's` where another returns `beautys` and a third splits the word in two,
 /// and the three cannot be held against each other however alike they heard the sound.
 public enum Words {
-    /// A token that carries one of these opens a word; they are not part of any word.
     private static let opensAWord: Set<Character> = ["▁", "|", " ", "\t", "\n"]
 
-    /// What the recogniser could not spell at all, which belongs in no word.
     private static let unheard = "<unk>"
 
     /// The words in a recogniser's tokens, each timed from the first token it opens with
