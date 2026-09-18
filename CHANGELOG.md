@@ -1,8 +1,19 @@
 # Changelog
 
+## 0.12.0
+
+`least_overlap`, which 0.11.0 added, is gone again. It was measured and cost more than it saved; use 0.10.0 or this, not 0.11.0.
+
+### Removed
+- `least_overlap` from `rules.yaml` and `Rules`, and the floor it put under the overlap between two pieces. Two pieces can again meet edge to edge where no pause offers itself to begin the next at.
+
+  What the floor was for is real: pieces that meet exactly share no ground, the join has nothing to settle them by, and a word invented at the edge of one of them stands. Over 154 readings ten are cut that way and every one gains a word on the side that pads its input to a fixed length.
+
+  What it cost is larger. Moving the start of a piece changes the length of what the model is asked, and this model answers a different length with different words: between two of the three sides, 222 differences with no floor, 225 at two seconds, 248 at half a second. The ten invented words went at two seconds and twelve other differences arrived in their place. A seam is not worth paying for with every other piece.
+
 ## 0.11.0
 
-`Pieces.cuts` never hands back two pieces that meet edge to edge. Nothing you call changes; where the pieces fall does.
+`Pieces.cuts` never hands back two pieces that meet edge to edge. Nothing you call changes; where the pieces fall does. **Measured worse than 0.10.0 and undone in 0.12.0.**
 
 ### Changed
 - The next piece begins one pause earlier than the last ended, as before, and now never less than `least_overlap` earlier. Where no pause offered itself the two pieces met exactly, shared no ground at all, and the join had nothing to settle them by — a recogniser invents a word while it is hearing the last of what it was given, and with nothing in common there was nothing to catch it against. Measured over 154 readings, ten of them were cut that way and every one of those gained a word on the side that pads its input to a fixed length; with the floor the invented word is gone from all ten and two of the readings come back word for word alike with the other side.

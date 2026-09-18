@@ -63,29 +63,29 @@ cuts:
     waveform:
       - {level: 0.5, seconds: 12.0}
     equals: [[0, 1200]]
-  - name: "a long recording with no pause is cut on length alone, and overlapped by the least"
+  # Two pieces meeting edge to edge share no ground, and the join then has nothing to
+  # settle them by. A floor on the overlap was tried for that and measured worse: moving
+  # the start of a piece changes the length of what the model is asked, and this model
+  # answers a different length with different words.
+  - name: "a long recording with no pause is cut on length alone"
     sample_rate: 100
     waveform:
       - {level: 0.5, seconds: 20.0}
-    equals: [[0, 1200], [1000, 2000]]
-  # Beginning the next piece earlier can leave more than a piece still to ask, and then
-  # there is one more piece than there would have been. The last of them is mostly ground
-  # already covered, which the join takes off; a seam with nothing in common is the thing
-  # worth paying that for.
+    equals: [[0, 1200], [1200, 2000]]
   - name: "a pause late in the piece is where the cut falls"
     sample_rate: 100
     waveform:
       - {level: 0.5, seconds: 8.0}
       - {level: 0.001, seconds: 3.0}
       - {level: 0.5, seconds: 9.0}
-    equals: [[0, 950], [750, 1950], [1750, 2000]]
+    equals: [[0, 950], [950, 2000]]
   - name: "a pause too early in the piece is not cut at, and not overlapped back to"
     sample_rate: 100
     waveform:
       - {level: 0.5, seconds: 2.0}
       - {level: 0.001, seconds: 3.0}
       - {level: 0.5, seconds: 15.0}
-    equals: [[0, 1200], [1000, 2000]]
+    equals: [[0, 1200], [1200, 2000]]
   - name: "two pauses in one piece: the cut takes the later, the overlap the earlier"
     sample_rate: 100
     waveform:
