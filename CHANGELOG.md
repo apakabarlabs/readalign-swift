@@ -5,7 +5,7 @@
 Nothing you call has to change. If you cut a recording with `Pieces.cuts` and stitched the answers back together yourself, that part is now a call.
 
 ### Added
-- `Pieces.joined` turns what each piece came back with into one reading, placed in the seconds of the whole recording. The pieces overlap, so a word at a seam arrives twice, and the second copy goes by time and text together, on the `same_moment` number 0.6.0 already shipped. Left to each caller, this is where two sides that cut a reading identically still end up with different transcripts.
+- `Pieces.joined` turns what each piece came back with into one reading, placed in the seconds of the whole recording. The pieces overlap, so a word at a seam arrives twice, and the second copy goes by time and text together, on `same_moment` in `rules.yaml`: how close two marks of one word have to be for the overlap to have said it once. Left to each caller, this is where two sides that cut a reading identically still end up with different transcripts.
 - A piece the recogniser had nothing to say about adds nothing, which is an answer rather than a fault. A transcript missing for a piece, or one too many, is refused rather than paired off until the shorter of the two runs out: every word after the missing one would be placed at the wrong moment, and the reading would come back looking whole.
 
 ## 0.6.0
@@ -31,11 +31,11 @@ Nothing you call has to change. What comes back changes for Greek words ending i
 
 ## 0.4.0
 
-Nothing you call has to change. A token that is only a mark now normalises to nothing, as the documentation always said it did, so what comes back changes where such a token appears.
+Nothing you call has to change. A token that is only a mark now normalises to nothing, as the README always said it did, so what comes back changes where such a token appears.
 
 ### Fixed
 - A mark that is only ever written above or beside a letter is no longer a word in its own right. A Devanagari visarga standing alone used to normalise to itself and so be joined onto the word beside it, taking that word's stretch of the recording with it; it is now passed over, which is what a stray mark has always been documented to do. The letters of a word are unaffected: a mark attached to its letter is part of that letter as before.
-- A `folded_letters` entry longer than one character is honoured whole rather than cut to its first character. Every entry in the shared file is one character today, so nothing changes yet; adding a two-letter fold would otherwise have produced two answers across the ports from a file whose purpose is that they produce one.
+- A `folded_letters` entry longer than one character is honoured whole rather than cut to its first character. Every entry in `rules.yaml`, the file of numbers and letters the ports share, is one character today, so nothing changes yet; adding a two-letter fold would otherwise have produced two answers across the ports from a file whose purpose is that they produce one.
 
 ### Added
 - A Kotlin port, [readalign-kotlin](https://github.com/apakabarlabs/readalign-kotlin). The shared cases now pin where a language's letters are cut apart, which is not something a port may answer for itself: a word carrying a zero-width joiner and a word carrying a spacing mark each have a case of their own.
@@ -64,7 +64,7 @@ A Python port of this library now exists, and the two are held to one set of tun
 
 ### Fixed
 - A token with no letters in it — a numeral, a stray mark — was joined onto its neighbour for free, because it adds nothing to the joined string and so cannot lower the likeness. `From 1999 fairest` gave `From` everything up to `fairest`. Such a token is now passed over.
-- A weighting answering with something that is not a number travelled through `max` into every span. It is read as one instead.
+- A weighting answering with something that is not a number was compared against the smallest allowed weight and won, because a comparison against such a value is false whichever way round it is put, and it then travelled into every span. It is read as one instead.
 
 ## 0.1.0
 
