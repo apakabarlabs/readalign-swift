@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.11.0
+
+`Pieces.cuts` never hands back two pieces that meet edge to edge. Nothing you call changes; where the pieces fall does.
+
+### Changed
+- The next piece begins one pause earlier than the last ended, as before, and now never less than `least_overlap` earlier. Where no pause offered itself the two pieces met exactly, shared no ground at all, and the join had nothing to settle them by — a recogniser invents a word while it is hearing the last of what it was given, and with nothing in common there was nothing to catch it against. Measured over 154 readings, ten of them were cut that way and every one of those gained a word on the side that pads its input to a fixed length; with the floor the invented word is gone from all ten and two of the readings come back word for word alike with the other side.
+- Beginning the next piece earlier can leave more than a piece still to ask, and then there is one more piece than there would have been. The last of them is mostly ground already covered, which the join takes off.
+
 ## 0.10.0
 
 Nothing you call has to change. If you turn a recogniser's tokens into words yourself, that is now a call.

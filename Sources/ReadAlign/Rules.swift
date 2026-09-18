@@ -29,6 +29,7 @@ public struct Rules: Codable, Sendable {
     public let pieceSeconds: TimeInterval
     public let shortestPieceShare: Double
     public let pauseSeconds: TimeInterval
+    public let leastOverlap: TimeInterval
     public let askAgainTrims: [TimeInterval]
     public let shortestWorthAskingAgain: TimeInterval
 
@@ -58,6 +59,7 @@ public struct Rules: Codable, Sendable {
         case pieceSeconds = "piece_seconds"
         case shortestPieceShare = "shortest_piece_share"
         case pauseSeconds = "pause_seconds"
+        case leastOverlap = "least_overlap"
         case askAgainTrims = "ask_again_trims"
         case shortestWorthAskingAgain = "shortest_worth_asking_again"
     }

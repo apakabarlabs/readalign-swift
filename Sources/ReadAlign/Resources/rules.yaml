@@ -117,6 +117,15 @@ shortest_piece_share: 0.5
 # a consonant, and cutting there takes a word in half.
 pause_seconds: 0.2
 
+# How much of the piece before the next one takes at the least, when no pause offers itself
+# to begin at. Without a floor the two pieces meet edge to edge and share nothing: a
+# recogniser invents a word while it is hearing the last of what it was given, and with no
+# ground in common there is nothing for the join to catch it against. Measured on the whole
+# corpus, ten of the readings met that way and every one of them gained a word on the side
+# that pads its input. Wider than the longest trim asked for on an empty piece, so a
+# trimmed tail is always covered by the piece that follows.
+least_overlap: 2.0
+
 # Each piece begins a pause earlier than the one before it ended, so every word is heard
 # whole by at least one piece. What the overlap says twice is dropped by the text alone:
 # the run of words the piece before already said comes off the front of the one coming,
