@@ -91,3 +91,73 @@ cuts:
       - {level: 0.001, seconds: 1.5}
       - {level: 0.5, seconds: 7.0}
     equals: [[0, 1025], [675, 1800]]
+
+# Joining what each piece came back with into one reading. The pieces overlap, so a word
+# at a seam arrives twice, and the second copy is dropped by time and text together: the
+# same word marked within `same_moment` of one already kept is one word.
+#
+# A case names the pieces in samples, what each of them returned in its own seconds, and
+# the reading that comes out, in the seconds of the whole recording. The times are chosen
+# to be exact in binary, so every port compares them as written rather than deciding for
+# itself how close is close enough.
+joins:
+  - name: "a word the seam says twice is kept once, where the first piece put it"
+    sample_rate: 1000
+    pieces: [[0, 1500], [1000, 2500]]
+    heard:
+      - - {text: "when", start: 0.125, end: 0.375}
+        - {text: "forty", start: 1.25, end: 1.5}
+      - - {text: "forty", start: 0.375, end: 0.625}
+        - {text: "winters", start: 0.75, end: 1.0}
+    equals:
+      - {text: "when", start: 0.125, end: 0.375}
+      - {text: "forty", start: 1.25, end: 1.5}
+      - {text: "winters", start: 1.75, end: 2.0}
+  - name: "the same word said again later in the reading is a second word"
+    sample_rate: 1000
+    pieces: [[0, 2000]]
+    heard:
+      - - {text: "love", start: 0.5, end: 0.75}
+        - {text: "love", start: 1.5, end: 1.75}
+    equals:
+      - {text: "love", start: 0.5, end: 0.75}
+      - {text: "love", start: 1.5, end: 1.75}
+  - name: "the pieces spell the seam word differently and it is still one word"
+    sample_rate: 1000
+    pieces: [[0, 1500], [1000, 2500]]
+    heard:
+      - - {text: "Winter's", start: 1.25, end: 1.5}
+      - - {text: "winters", start: 0.375, end: 0.625}
+    equals:
+      - {text: "Winter's", start: 1.25, end: 1.5}
+  - name: "a piece the recogniser had nothing to say about adds nothing"
+    sample_rate: 1000
+    pieces: [[0, 1500], [1000, 2500]]
+    heard:
+      - - {text: "hush", start: 0.25, end: 0.5}
+      - []
+    equals:
+      - {text: "hush", start: 0.25, end: 0.5}
+  - name: "a word is placed where it falls in the whole recording, not in its piece"
+    sample_rate: 1000
+    pieces: [[1000, 2500]]
+    heard:
+      - - {text: "answer", start: 0.25, end: 0.5}
+    equals:
+      - {text: "answer", start: 1.25, end: 1.5}
+
+# A transcript missing for a piece, or one too many, is refused rather than paired off
+# until the shorter of the two runs out: every word after the missing one would be placed
+# at the wrong moment of the recording, and the reading would come back looking whole.
+join_refusals:
+  - name: "a piece with no transcript at all is refused"
+    sample_rate: 1000
+    pieces: [[0, 1500], [1000, 2500]]
+    heard:
+      - - {text: "when", start: 0.125, end: 0.375}
+  - name: "a transcript belonging to no piece is refused"
+    sample_rate: 1000
+    pieces: [[0, 1500]]
+    heard:
+      - - {text: "when", start: 0.125, end: 0.375}
+      - - {text: "forty", start: 0.375, end: 0.625}

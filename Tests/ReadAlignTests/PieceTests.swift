@@ -45,9 +45,52 @@ struct CutCase: Codable, CustomTestStringConvertible {
     var pieces: [Range<Int>] { equals.map { $0[0] ..< $0[1] } }
 }
 
+struct JoinCase: Codable, CustomTestStringConvertible {
+    let name: String
+    let sampleRate: Double
+    let pieces: [[Int]]
+    let heard: [[HeardWord]]
+    let equals: [HeardWord]
+
+    enum CodingKeys: String, CodingKey {
+        case name, pieces, heard, equals
+        case sampleRate = "sample_rate"
+    }
+
+    var testDescription: String { name }
+
+    var ranges: [Range<Int>] { pieces.map { $0[0] ..< $0[1] } }
+    var transcripts: [[RecognizedWord]] { heard.map { $0.map(\.recognized) } }
+    var reading: [RecognizedWord] { equals.map(\.recognized) }
+}
+
+struct JoinRefusalCase: Codable, CustomTestStringConvertible {
+    let name: String
+    let sampleRate: Double
+    let pieces: [[Int]]
+    let heard: [[HeardWord]]
+
+    enum CodingKeys: String, CodingKey {
+        case name, pieces, heard
+        case sampleRate = "sample_rate"
+    }
+
+    var testDescription: String { name }
+
+    var ranges: [Range<Int>] { pieces.map { $0[0] ..< $0[1] } }
+    var transcripts: [[RecognizedWord]] { heard.map { $0.map(\.recognized) } }
+}
+
 struct PieceFile: Codable {
     let pauses: [PauseCase]
     let cuts: [CutCase]
+    let joins: [JoinCase]
+    let joinRefusals: [JoinRefusalCase]
+
+    enum CodingKeys: String, CodingKey {
+        case pauses, cuts, joins
+        case joinRefusals = "join_refusals"
+    }
 }
 
 struct PieceTests {
@@ -78,6 +121,28 @@ struct PieceTests {
             // a word no recogniser is ever asked about.
             #expect(later.lowerBound <= earlier.upperBound, "\(cutCase.name): a gap between pieces")
             #expect(later.lowerBound > earlier.lowerBound, "\(cutCase.name): a piece that goes nowhere")
+        }
+    }
+
+    @Test(arguments: file.joins)
+    func joinsThePiecesIntoTheReadingTheCorpusNames(joinCase: JoinCase) throws {
+        let reading = try Pieces.joined(
+            joinCase.transcripts,
+            at: joinCase.ranges,
+            sampleRate: joinCase.sampleRate
+        )
+
+        #expect(reading == joinCase.reading, "\(joinCase.name): \(reading)")
+    }
+
+    @Test(arguments: file.joinRefusals)
+    func refusesAPieceAndItsTranscriptThatDoNotPairOff(refusal: JoinRefusalCase) {
+        #expect(throws: PiecesError.self, "\(refusal.name)") {
+            try Pieces.joined(
+                refusal.transcripts,
+                at: refusal.ranges,
+                sampleRate: refusal.sampleRate
+            )
         }
     }
 }

@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.7.0
+
+Nothing you call has to change. If you cut a recording with `Pieces.cuts` and stitched the answers back together yourself, that part is now a call.
+
+### Added
+- `Pieces.joined` turns what each piece came back with into one reading, placed in the seconds of the whole recording. The pieces overlap, so a word at a seam arrives twice, and the second copy goes by time and text together, on the `same_moment` number 0.6.0 already shipped. Left to each caller, this is where two sides that cut a reading identically still end up with different transcripts.
+- A piece the recogniser had nothing to say about adds nothing, which is an answer rather than a fault. A transcript missing for a piece, or one too many, is refused rather than paired off until the shorter of the two runs out: every word after the missing one would be placed at the wrong moment, and the reading would come back looking whole.
+
 ## 0.6.0
 
 Nothing you call has to change. There is a new call for anyone who hands a long recording to a speech recogniser.

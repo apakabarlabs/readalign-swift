@@ -8,6 +8,9 @@ import Foundation
 /// windows to another is two different questions, and the answers cannot be held against
 /// each other. So the cut is made here, by rule, before any of them is asked.
 public enum Pieces {
+    /// A cut goes in the middle of the quiet, as far from the word on either side as it gets.
+    private static let halves = 2
+
     /// Where the recording is quiet for long enough that a cut there takes no word in half.
     ///
     /// The middle of each stretch of quiet, in samples. A stop inside a word is quiet too,
@@ -31,12 +34,14 @@ public enum Pieces {
                 continue
             }
             if quiet >= quietEnough {
-                found.append(Int(Double(index - quiet / 2) * eachFrame * sampleRate))
+                let middleOfTheQuiet = quiet / halves
+                found.append(Int(Double(index - middleOfTheQuiet) * eachFrame * sampleRate))
             }
             quiet = 0
         }
         if quiet >= quietEnough {
-            found.append(Int(Double(frames.count - quiet / 2) * eachFrame * sampleRate))
+            let middleOfTheQuiet = quiet / halves
+            found.append(Int(Double(frames.count - middleOfTheQuiet) * eachFrame * sampleRate))
         }
         return found
     }
@@ -67,4 +72,49 @@ public enum Pieces {
         pieces.append(start ..< samples.count)
         return pieces
     }
+
+    /// One transcript out of what each piece came back with.
+    ///
+    /// The pieces overlap, so the words at a seam arrive twice, and the second copy is
+    /// dropped by time and text together: the same word marked within `same_moment` of
+    /// one already kept is one word. Placed where it falls in the whole recording, so a
+    /// caller hands over what it was given piece by piece and gets the reading back.
+    ///
+    /// A piece the recogniser had nothing to say about is an answer, not a failure: a
+    /// stretch of silence is transcribed as no words at all. A count of transcripts that
+    /// does not match the count of pieces is a failure, and is refused rather than
+    /// quietly paired off until the shorter of the two runs out.
+    public static func joined(
+        _ heard: [[RecognizedWord]],
+        at pieces: [Range<Int>],
+        sampleRate: Double
+    ) throws -> [RecognizedWord] {
+        guard heard.count == pieces.count else {
+            throw PiecesError.unevenPieces(heard: heard.count, pieces: pieces.count)
+        }
+        var reading: [RecognizedWord] = []
+        for (words, piece) in zip(heard, pieces) {
+            let offset = Double(piece.lowerBound) / sampleRate
+            for word in words {
+                let placed = RecognizedWord(
+                    text: word.text,
+                    start: word.start + offset,
+                    end: word.end + offset
+                )
+                if !reading.contains(where: { sameWord($0, placed) }) {
+                    reading.append(placed)
+                }
+            }
+        }
+        return reading
+    }
+
+    static func sameWord(_ kept: RecognizedWord, _ word: RecognizedWord) -> Bool {
+        abs(kept.start - word.start) < Rules.shared.sameMoment
+            && TranscriptAligner.normalize(kept.text) == TranscriptAligner.normalize(word.text)
+    }
+}
+
+public enum PiecesError: Error, Equatable {
+    case unevenPieces(heard: Int, pieces: Int)
 }

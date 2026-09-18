@@ -71,6 +71,8 @@ The other. A recogniser given a long reading cuts it into windows of its own, an
 
 A pause is found against the threshold the recording sets for itself: quiet is what stands well below its quietest tenth. A reading with hardly any silence in it therefore offers no pause at all and is cut on length, because there nothing stands out from that tenth.
 
+`Pieces.joined` takes what each piece came back with, in the seconds of that piece, and gives back the reading in the seconds of the whole recording. The overlap means a word at a seam arrives twice, and the second copy goes by time and text together: the same word marked within `same_moment` of one already kept is one word. A piece the recogniser had nothing to say about adds nothing, which is an answer rather than a fault. A transcript missing for a piece is refused: every word after it would otherwise be placed at the wrong moment, and the reading would come back looking whole.
+
 ### Other languages
 
 Time is shared out among unmatched words by `SpeechWeighting`. A protocol rather than a function so each language brings its own: syllable counting by vowel groups holds for English and breaks on languages that write vowels differently or not at all.
