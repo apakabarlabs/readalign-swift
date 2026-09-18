@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.10.0
+
+Nothing you call has to change. If you turn a recogniser's tokens into words yourself, that is now a call.
+
+### Added
+- `Words.spoken` gathers a recogniser's tokens into the words they spell. A recogniser answers in tokens, not in words — `▁be`, `aut`, `y's` — and where one word ends is the model's convention rather than the caller's. Written out by each side, one returns `beauty's` where another returns `beautys` and a third splits the word in two, and the three readings cannot be held against each other however alike they heard the sound. A token opening with `▁`, a space or `|` opens a word; each word is timed from the token it opens with to the one it closes with; marks at either end of a word are the model's punctuation and are left off, while marks inside it stay.
+
 ## 0.9.0
 
 `Pieces.joined` drops the second copy of a seam word by the text alone. Nothing you call changes; what comes back does, and `same_moment` is gone from `rules.yaml`.

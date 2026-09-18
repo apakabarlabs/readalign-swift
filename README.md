@@ -65,6 +65,12 @@ It is asked with either side joined up as well, because a recogniser writes a hy
 
 One of the two calls that need the recording. A recogniser marks where a word stops being audible, not where the voice has finished with it, so a passage played to the mark stops a hair short of itself. Give `SilenceHold.held` the samples and the marks come back carried into the quiet, and never into the word that follows.
 
+### Reading what a recogniser answered
+
+A recogniser answers in tokens, not in words: `▁be`, `aut`, `y's`. `Words.spoken` gathers them into words, timed from the token each opens with to the one it closes with. A token opening with `▁`, a space or `|` opens a word; marks at either end of a word are the model's punctuation and are left off, while marks inside it stay, because `beauty's` and `self-substantial` are words and `beautys` is not.
+
+Here rather than in each caller, because where one word ends is the model's convention. Written out by each side, one returns `beauty's` where another returns `beautys` and a third splits the word in two, and the three readings cannot be held against each other however alike they heard the sound.
+
 ### Cutting a recording into pieces
 
 The other. A recogniser given a long reading cuts it into windows of its own, and every runtime cuts differently: a forty-second reading handed whole to one and in fifteen-second windows to another is two different questions, and the answers cannot be held against each other. `Pieces.cuts` returns the ranges to ask in, cut at the pauses `Pieces.pauses` finds and overlapping so that no word falls on a seam. Where no pause offers itself the piece ends on length alone, and then there is no overlap to give.

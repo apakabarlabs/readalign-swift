@@ -53,15 +53,27 @@ struct PrintedPartsCase: Codable, CustomTestStringConvertible {
     var testDescription: String { "\(word) -> \(parts)" }
 }
 
+struct SpokenCase: Codable, CustomTestStringConvertible {
+    let name: String
+    let tokens: [HeardWord]
+    let equals: [HeardWord]
+
+    var testDescription: String { name }
+
+    var said: [RecognizedWord] { tokens.map(\.recognized) }
+    var words: [RecognizedWord] { equals.map(\.recognized) }
+}
+
 struct WordFile: Codable {
     let printedParts: [PrintedPartsCase]
     let letters: [LettersCase]
     let normalize: [NormalizeCase]
     let similarity: [SimilarityCase]
     let englishSyllables: [SyllableCase]
+    let spoken: [SpokenCase]
 
     enum CodingKeys: String, CodingKey {
-        case letters, normalize, similarity
+        case letters, normalize, similarity, spoken
         case printedParts = "printed_parts"
         case englishSyllables = "english_syllables"
     }
@@ -114,5 +126,12 @@ struct WordTests {
         if let floor = syllableCase.atLeast {
             #expect(counted >= floor, "\(syllableCase.word)")
         }
+    }
+
+    @Test(arguments: file.spoken)
+    func gathersTokensIntoTheWordsTheCorpusNames(spokenCase: SpokenCase) {
+        let said = Words.spoken(spokenCase.said)
+
+        #expect(said == spokenCase.words, "\(spokenCase.name): \(said)")
     }
 }

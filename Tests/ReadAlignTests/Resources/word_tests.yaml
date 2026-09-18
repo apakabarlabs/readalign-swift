@@ -235,3 +235,46 @@ english_syllables:
   # Not dropped after "l", or "little" comes out as one syllable.
   - word: "little"
     count: 2
+
+# A recogniser answers in tokens, not in words, and where one word ends is its own
+# convention: a token opening with "▁" (or a space, or "|") opens a word. Each word is
+# timed from the token it opens with to the one it closes with. Marks at the edges of a
+# word are the model's punctuation and are left off; marks inside it are part of the word.
+spoken:
+  - name: "tokens are gathered into the words they spell"
+    tokens:
+      - {text: "▁be", start: 0.0, end: 0.1}
+      - {text: "aut", start: 0.1, end: 0.2}
+      - {text: "y's", start: 0.2, end: 0.3}
+      - {text: "▁rose", start: 0.4, end: 0.6}
+    equals:
+      - {text: "beauty's", start: 0.0, end: 0.3}
+      - {text: "rose", start: 0.4, end: 0.6}
+  - name: "punctuation at the edge of a word is not part of it"
+    tokens:
+      - {text: "▁increase,", start: 1.0, end: 1.5}
+    equals:
+      - {text: "increase", start: 1.0, end: 1.5}
+  - name: "a hyphen inside a word stays"
+    tokens:
+      - {text: "▁self-substantial", start: 2.0, end: 2.8}
+    equals:
+      - {text: "self-substantial", start: 2.0, end: 2.8}
+  - name: "a token holding a space spells two words"
+    tokens:
+      - {text: "self substantial", start: 3.0, end: 3.8}
+    equals:
+      - {text: "self", start: 3.0, end: 3.8}
+      - {text: "substantial", start: 3.0, end: 3.8}
+  - name: "what the model could not spell belongs to no word"
+    tokens:
+      - {text: "▁the", start: 4.0, end: 4.2}
+      - {text: "<unk>", start: 4.2, end: 4.4}
+      - {text: "▁world", start: 4.4, end: 4.8}
+    equals:
+      - {text: "the", start: 4.0, end: 4.2}
+      - {text: "world", start: 4.4, end: 4.8}
+  - name: "a token that is punctuation alone leaves no word behind"
+    tokens:
+      - {text: "▁,", start: 5.0, end: 5.1}
+    equals: []
