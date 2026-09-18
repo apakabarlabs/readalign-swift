@@ -120,15 +120,19 @@ pause_seconds: 0.2
 # Two pieces may meet edge to edge, where no pause offers itself to begin the next one at,
 # and then they share no ground and the join has nothing to settle them by: a recogniser
 # invents a word while it is hearing the last of what it was given, and with nothing in
-# common there is nothing to catch it against. Ten readings of the 154 are cut that way and
-# every one of them gains a word on the side that pads its input to a fixed length.
+# common there is nothing to catch it against. Of 631 seams over 154 readings, 57 are cut
+# that way, in 51 of the readings, and ten of them visibly gain a word on the side that
+# pads its input to a fixed length. So a seam with nothing in common is what the artefact
+# needs, not what it always produces.
 #
-# A floor on the overlap was tried for that and is not here, because it was measured and
-# cost more than it saved. Moving the start of a piece changes the length of what the model
-# is asked, and this model answers a different length with different words. At two seconds
-# the ten invented words went and twelve other differences arrived; at half a second the
-# reading came apart, 248 differences against 222 with no floor at all. The seam is not
-# worth paying for with every other piece.
+# A floor on the overlap was tried for that and is not here, because the floor measured
+# was the wrong one: it lowered the start of every seam under it, 223 of the 631, to mend
+# 57. Moving the start of a piece changes the length of what the model is asked, and this
+# model answers a different length with different words, so at two seconds the ten invented
+# words went and twelve other differences arrived; at half a second the join lost the two
+# matching words it needs and the reading came apart, 248 differences against 222 with no
+# floor at all. A floor that applies only where the overlap is nothing has not been
+# measured.
 
 # Each piece begins a pause earlier than the one before it ended, so every word is heard
 # whole by at least one piece. What the overlap says twice is dropped by the text alone:

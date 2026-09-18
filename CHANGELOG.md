@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.12.1
+
+### Fixed
+- The count in the note about seams that share no ground. It said ten readings of 154 were cut that way and every one of them gained a word; counted rather than guessed, 57 seams of 631 meet edge to edge, in 51 of the readings, and ten of those visibly gain a word. And the floor that was measured lowered every seam under it, 223 of the 631, rather than only the 57 that need it, so what is disproved is that floor and not the idea.
+
 ## 0.12.0
 
 `least_overlap`, which 0.11.0 added, is gone again. It was measured and cost more than it saved; use 0.10.0 or this, not 0.11.0.
@@ -7,9 +12,9 @@
 ### Removed
 - `least_overlap` from `rules.yaml` and `Rules`, and the floor it put under the overlap between two pieces. Two pieces can again meet edge to edge where no pause offers itself to begin the next at.
 
-  What the floor was for is real: pieces that meet exactly share no ground, the join has nothing to settle them by, and a word invented at the edge of one of them stands. Over 154 readings ten are cut that way and every one gains a word on the side that pads its input to a fixed length.
+  What the floor was for is real: pieces that meet exactly share no ground, the join has nothing to settle them by, and a word invented at the edge of one of them stands. Of 631 seams over 154 readings, 57 are cut that way, in 51 of the readings, and ten of those visibly gain a word on the side that pads its input to a fixed length.
 
-  What it cost is larger. Moving the start of a piece changes the length of what the model is asked, and this model answers a different length with different words: between two of the three sides, 222 differences with no floor, 225 at two seconds, 248 at half a second. The ten invented words went at two seconds and twelve other differences arrived in their place. A seam is not worth paying for with every other piece.
+  What it cost is larger, and the floor measured was the wrong one: it lowered the start of every seam under it, 223 of the 631, to mend 57. Moving the start of a piece changes the length of what the model is asked, and this model answers a different length with different words: between two of the three sides, 222 differences with no floor, 225 at two seconds, 248 at half a second. A floor that applies only where the overlap is nothing has not been measured.
 
 ## 0.11.0
 
