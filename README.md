@@ -73,6 +73,12 @@ A pause is found against the threshold the recording sets for itself: quiet is w
 
 `Pieces.joined` takes what each piece came back with, in the seconds of that piece, and gives back the reading in the seconds of the whole recording. The overlap means a word at a seam arrives twice, and the second copy goes by time and text together: the same word marked within `same_moment` of one already kept is one word. A piece the recogniser had nothing to say about adds nothing, which is an answer rather than a fault. A transcript missing for a piece is refused: every word after it would otherwise be placed at the wrong moment, and the reading would come back looking whole.
 
+### When the recogniser answers nothing at all
+
+Parakeet answers some pieces of ordinary speech with no words at all. Whether it does turns on where the piece starts and how long it is together rather than on the speech in it: the mel statistics are taken over the piece, so its length moves them, and past some edge the decoder predicts blank at every frame. Handing over a little less of the tail moves the piece off that edge.
+
+`Pieces.heard` calls the recogniser for you and asks again while nothing comes back, taking `ask_again_trims` off the tail in turn and keeping the first answer with words in it. Measured over ten sonnets it gave back every silent piece. A piece shorter than `shortest_worth_asking_again` is asked once: nothing here tells speech from silence, so a piece that is genuinely quiet would otherwise pay for the whole list before answering nothing. What comes back is missing whatever was said in the trimmed tail, which the overlap with the next piece covers.
+
 ### Other languages
 
 Time is shared out among unmatched words by `SpeechWeighting`. A protocol rather than a function so each language brings its own: syllable counting by vowel groups holds for English and breaks on languages that write vowels differently or not at all.

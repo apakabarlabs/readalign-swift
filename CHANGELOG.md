@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.8.0
+
+Nothing you call has to change. If you hand a piece of a recording to a speech recogniser, there is a new call to hand it over through.
+
+### Added
+- `Pieces.heard(of:sampleRate:asking:)` asks the recogniser through you, and asks again with less of the tail while nothing comes back. Parakeet answers some pieces of ordinary speech with no words at all, and whether it does turns on where the piece starts and how long it is together rather than on the speech in it: the mel statistics are taken over the piece, so its length moves them, and past some edge the decoder predicts blank at every frame. The lengths to take off and the order to try them are `ask_again_trims` in `rules.yaml`, and `shortest_worth_asking_again` is the length below which nothing heard is simply an answer. What comes back this way is missing whatever was said in the trimmed tail, which the overlap with the next piece covers.
+
 ## 0.7.0
 
 Nothing you call has to change. If you cut a recording with `Pieces.cuts` and stitched the answers back together yourself, that part is now a call.

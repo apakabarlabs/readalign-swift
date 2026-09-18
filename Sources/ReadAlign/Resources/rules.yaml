@@ -121,3 +121,17 @@ pause_seconds: 0.2
 # whole by at least one piece. What the overlap then says twice is dropped by time and
 # text together: the same word, marked this close to the same moment, is one word.
 same_moment: 0.2
+
+# Asking again when the recogniser answers nothing at all.
+#
+# Parakeet returns an empty answer for some pieces of ordinary speech, and whether it does
+# turns on where the piece starts and how long it is together rather than on the speech in
+# it. Handing over a little less of the tail moves it off that edge. These are the lengths
+# to take off, in the order to try them, keeping the first answer that is not empty;
+# measured over the sonnets they gave back every silent piece. The cost is the trimmed
+# tail, which the overlap with the next piece has to cover.
+ask_again_trims: [0.1, 0.2, 0.3, 0.5, 0.8, 1.3]
+
+# Shorter than this and nothing heard is an answer rather than a defect: there is not
+# enough in the piece to expect words from it.
+shortest_worth_asking_again: 2.0

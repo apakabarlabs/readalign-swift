@@ -109,6 +109,37 @@ public enum Pieces {
         return reading
     }
 
+    /// What one piece comes back as, asking again with less of its tail while nothing comes.
+    ///
+    /// Parakeet answers some pieces of ordinary speech with no words at all, and whether it
+    /// does turns on where the piece starts and how long it is together: the mel statistics
+    /// are taken over the piece, so its length moves them, and past some edge the decoder
+    /// predicts blank at every frame. Handing over a little less of the tail moves the piece
+    /// off that edge. Nothing here tells speech from silence, so a piece that is genuinely
+    /// silent pays for the whole list before answering nothing, which is why a piece shorter
+    /// than `shortest_worth_asking_again` is not asked again at all.
+    ///
+    /// An answer won this way is missing whatever was said in the tail that was cut off. Each
+    /// piece the recording is cut into overlaps the next, and that overlap is what covers it.
+    public static func heard(
+        of piece: [Float],
+        sampleRate: Double,
+        asking: ([Float]) throws -> [RecognizedWord]
+    ) rethrows -> [RecognizedWord] {
+        let words = try asking(piece)
+        guard words.isEmpty,
+              Double(piece.count) / sampleRate >= Rules.shared.shortestWorthAskingAgain
+        else { return words }
+
+        for trim in Rules.shared.askAgainTrims {
+            let shorter = piece.count - Int(trim * sampleRate)
+            guard shorter > 0 else { break }
+            let again = try asking(Array(piece[0 ..< shorter]))
+            if !again.isEmpty { return again }
+        }
+        return words
+    }
+
     static func sameWord(_ kept: RecognizedWord, _ word: RecognizedWord) -> Bool {
         abs(kept.start - word.start) < Rules.shared.sameMoment
             && TranscriptAligner.normalize(kept.text) == TranscriptAligner.normalize(word.text)
