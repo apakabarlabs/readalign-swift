@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.8.1
+
+### Changed
+- `Pieces.heard` takes an `async` closure and is awaited. Every recogniser it is written for answers that way, and a caller that had to bridge the two would be writing the asking again itself, which is the thing this call exists to stop. The other ports are unchanged: their recognisers answer in place.
+
 ## 0.8.0
 
 Nothing you call has to change. If you hand a piece of a recording to a speech recogniser, there is a new call to hand it over through.

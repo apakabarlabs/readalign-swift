@@ -154,11 +154,11 @@ struct PieceTests {
     }
 
     @Test
-    func asksOnceWhenTheFirstAnswerHasWordsInIt() {
+    func asksOnceWhenTheFirstAnswerHasWordsInIt() async {
         let piece = Self.piece(ofSeconds: 10)
         var asked: [Int] = []
 
-        let words = Pieces.heard(of: piece, sampleRate: Self.sampleRate) { given in
+        let words = await Pieces.heard(of: piece, sampleRate: Self.sampleRate) { given in
             asked.append(given.count)
             return Self.oneWord
         }
@@ -168,13 +168,13 @@ struct PieceTests {
     }
 
     @Test
-    func asksAgainWithLessOfTheTailUntilSomethingComesBack() {
+    func asksAgainWithLessOfTheTailUntilSomethingComesBack() async {
         let piece = Self.piece(ofSeconds: 10)
         // Says its word once three tenths of a second have come off the tail.
         let speaks = piece.count - Int(0.3 * Self.sampleRate)
         var asked: [Int] = []
 
-        let words = Pieces.heard(of: piece, sampleRate: Self.sampleRate) { given in
+        let words = await Pieces.heard(of: piece, sampleRate: Self.sampleRate) { given in
             asked.append(given.count)
             return given.count <= speaks ? Self.oneWord : []
         }
@@ -185,10 +185,10 @@ struct PieceTests {
     }
 
     @Test
-    func leavesAPieceTooShortToExpectWordsFromAskedOnlyOnce() {
+    func leavesAPieceTooShortToExpectWordsFromAskedOnlyOnce() async {
         var asked = 0
 
-        let words = Pieces.heard(of: Self.piece(ofSeconds: 1), sampleRate: Self.sampleRate) { _ in
+        let words = await Pieces.heard(of: Self.piece(ofSeconds: 1), sampleRate: Self.sampleRate) { _ in
             asked += 1
             return []
         }
@@ -198,10 +198,10 @@ struct PieceTests {
     }
 
     @Test
-    func answersNothingWhenNoTrimBringsWordsBack() {
+    func answersNothingWhenNoTrimBringsWordsBack() async {
         var asked = 0
 
-        let words = Pieces.heard(of: Self.piece(ofSeconds: 10), sampleRate: Self.sampleRate) { _ in
+        let words = await Pieces.heard(of: Self.piece(ofSeconds: 10), sampleRate: Self.sampleRate) { _ in
             asked += 1
             return []
         }

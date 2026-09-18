@@ -121,12 +121,13 @@ public enum Pieces {
     ///
     /// An answer won this way is missing whatever was said in the tail that was cut off. Each
     /// piece the recording is cut into overlaps the next, and that overlap is what covers it.
+    /// Asking is `async` because every recogniser this is written for answers that way.
     public static func heard(
         of piece: [Float],
         sampleRate: Double,
-        asking: ([Float]) throws -> [RecognizedWord]
-    ) rethrows -> [RecognizedWord] {
-        let words = try asking(piece)
+        asking: ([Float]) async throws -> [RecognizedWord]
+    ) async rethrows -> [RecognizedWord] {
+        let words = try await asking(piece)
         guard words.isEmpty,
               Double(piece.count) / sampleRate >= Rules.shared.shortestWorthAskingAgain
         else { return words }
@@ -134,7 +135,7 @@ public enum Pieces {
         for trim in Rules.shared.askAgainTrims {
             let shorter = piece.count - Int(trim * sampleRate)
             guard shorter > 0 else { break }
-            let again = try asking(Array(piece[0 ..< shorter]))
+            let again = try await asking(Array(piece[0 ..< shorter]))
             if !again.isEmpty { return again }
         }
         return words
