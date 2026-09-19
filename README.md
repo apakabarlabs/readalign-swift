@@ -179,7 +179,7 @@ Two things it does not hold, and cannot, because neither reaches the result:
 ## Install
 
 ```swift
-.package(url: "https://github.com/apakabarlabs/readalign-swift", from: "0.13.0")
+.package(url: "https://github.com/apakabarlabs/readalign-swift", from: "0.13.1")
 ```
 
 Before 1.0, a minor release may change the API. Pin an exact version when that matters to you.

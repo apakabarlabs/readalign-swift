@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.13.1
+
+No behavioural changes. This keeps the three ports on the same release number while
+the Python package corrects its reported distribution version.
+
 ## 0.13.0
 
 ### Added
