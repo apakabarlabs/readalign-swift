@@ -25,6 +25,11 @@ room_enough: 0.04
 # since a recogniser splits a long word wherever it likes.
 join_span: 2
 
+# A work-level allowance may join a longer phrase, but likeness alone never may.
+# This reaches recogniser tokenisations such as "alchemy" -> "out to me" without
+# letting an unpatched reader swallow neighbouring words.
+vouched_join_span: 6
+
 # Letters that open a syllable for the English weighting.
 english_vowels: "aeiouy"
 

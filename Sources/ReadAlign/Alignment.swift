@@ -30,6 +30,7 @@ struct Alignment {
         if equivalent?(expected[row], joined, row > 0 ? expected[row - 1] : nil) == true {
             return 1
         }
+        guard span <= spans(forExpectedAt: row) else { return -.infinity }
         return worth(TranscriptAligner.similarity(expected[row], joined), against: joinThreshold)
     }
 
@@ -37,14 +38,20 @@ struct Alignment {
         max(Rules.shared.joinSpan, printedParts[row])
     }
 
-    func joinedExpected(_ row: Int, _ column: Int) -> Double {
-        guard joinable(expected[(row - 1)...row]), !heard[column].isEmpty else {
+    func consideredSpans(forExpectedAt row: Int) -> ClosedRange<Int> {
+        Self.pair...max(spans(forExpectedAt: row), Rules.shared.vouchedJoinSpan)
+    }
+
+    func joinedExpected(_ row: Int, _ column: Int, span: Int) -> Double {
+        let parts = expected[(row - span + 1)...row]
+        guard joinable(parts), !heard[column].isEmpty else {
             return mismatchPenalty
         }
-        let joined = expected[row - 1] + expected[row]
-        if equivalent?(joined, heard[column], row > 1 ? expected[row - Self.pair] : nil) == true {
+        let joined = parts.joined()
+        if equivalent?(joined, heard[column], row >= span ? expected[row - span] : nil) == true {
             return 1
         }
+        guard span <= Self.pair else { return -.infinity }
         return worth(TranscriptAligner.similarity(joined, heard[column]), against: joinThreshold)
     }
 
@@ -80,15 +87,17 @@ struct Alignment {
                 var best = score[row - 1][column - 1] + straight(row - 1, column - 1)
                 best = max(best, score[row - 1][column] + gapPenalty)
                 best = max(best, score[row][column - 1] + gapPenalty)
-                for span in Self.pair...spans(forExpectedAt: row - 1) where column >= span {
+                for span in consideredSpans(forExpectedAt: row - 1) where column >= span {
                     best = max(
                         best,
                         score[row - 1][column - span] + joinedHeard(row - 1, column - 1, span: span)
                     )
                 }
                 if row >= Self.pair {
-                    let reached = score[row - Self.pair][column - 1]
-                    best = max(best, reached + joinedExpected(row - 1, column - 1))
+                    for span in Self.pair...min(row, Rules.shared.vouchedJoinSpan) {
+                        let reached = score[row - span][column - 1]
+                        best = max(best, reached + joinedExpected(row - 1, column - 1, span: span))
+                    }
                 }
                 if row >= Self.pair, column >= Self.pair {
                     let reached = score[row - Self.pair][column - Self.pair]
@@ -114,7 +123,7 @@ struct Alignment {
                 }
                 row -= 1
                 column -= 1
-            } else if let span = (Self.pair...spans(forExpectedAt: row - 1)).first(where: { span in
+            } else if let span = consideredSpans(forExpectedAt: row - 1).first(where: { span in
                 column >= span
                     && cell == score[row - 1][column - span]
                         + joinedHeard(row - 1, column - 1, span: span)
@@ -136,13 +145,17 @@ struct Alignment {
                 row -= Self.pair
                 column -= Self.pair
             } else if row >= Self.pair,
-                cell == score[row - Self.pair][column - 1] + joinedExpected(row - 1, column - 1)
+                let span = (Self.pair...min(row, Rules.shared.vouchedJoinSpan)).first(where: {
+                    span in
+                    cell == score[row - span][column - 1]
+                        + joinedExpected(row - 1, column - 1, span: span)
+                })
             {
-                if joinedExpected(row - 1, column - 1) >= joinThreshold {
-                    let back = (row - Self.pair)..<row
+                if joinedExpected(row - 1, column - 1, span: span) >= joinThreshold {
+                    let back = (row - span)..<row
                     matches.append(WordMatch(expected: back, heard: (column - 1)..<column))
                 }
-                row -= Self.pair
+                row -= span
                 column -= 1
             } else if cell == score[row - 1][column] + gapPenalty {
                 row -= 1

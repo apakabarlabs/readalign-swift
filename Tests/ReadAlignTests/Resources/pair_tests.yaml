@@ -122,6 +122,34 @@ tests:
           - expected: [0, 2]
             heard: [0, 1]
 
+      - name: "a vouched word may be heard as three tokens"
+        expected: ["this", "alchemy", "now"]
+        heard: ["this", "out", "to", "me", "now"]
+        threshold: 0.6
+        equivalent:
+          - {written: "alchemy", heard: "outtome", after: "this"}
+        want:
+          - expected: [1, 2]
+            heard: [1, 4]
+
+      - name: "a vouched printed phrase may be heard as one token"
+        expected: ["painted", "new", "Speak", "of", "the", "spring", "and", "foison", "again"]
+        heard: ["painted", "new", "spezon", "again"]
+        threshold: 0.6
+        equivalent:
+          - {written: "speakofthespringandfoison", heard: "spezon", after: "new"}
+        want:
+          - expected: [2, 8]
+            heard: [2, 3]
+
+      - name: "six unvouched printed words may not disappear into one token"
+        expected: ["painted", "new", "Speak", "of", "the", "spring", "and", "foison", "again"]
+        heard: ["painted", "new", "spezon", "again"]
+        threshold: 0.6
+        want_absent:
+          - expected: [2, 8]
+            heard: [2, 3]
+
   - section: "A compound written with hyphens"
     cases:
       - name: "a compound of three parts matches the three words it is heard as"

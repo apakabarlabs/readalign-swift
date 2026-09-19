@@ -8,6 +8,7 @@ public struct Rules: Codable, Sendable {
     public let mismatchPenalty: Double
     public let roomEnough: TimeInterval
     public let joinSpan: Int
+    public let vouchedJoinSpan: Int
     public let englishVowels: String
     public let silentEnding: String
     public let silentEndingExceptAfter: String
@@ -39,6 +40,7 @@ public struct Rules: Codable, Sendable {
         case mismatchPenalty = "mismatch_penalty"
         case roomEnough = "room_enough"
         case joinSpan = "join_span"
+        case vouchedJoinSpan = "vouched_join_span"
         case englishVowels = "english_vowels"
         case silentEnding = "silent_ending"
         case silentEndingExceptAfter = "silent_ending_except_after"

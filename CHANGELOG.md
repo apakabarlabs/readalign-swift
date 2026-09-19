@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.13.0
+
+### Added
+- A work-level equivalence may join up to six printed or recognised words. Longer joins are impossible unless the caller explicitly vouches for the complete normalised phrase; similarity alone keeps the old two-word limit.
+
 ## 0.12.2
 
 No runtime changes. The repository now checks comments and the complete build in CI, publishes releases through one workflow, and points installation at the current version.
