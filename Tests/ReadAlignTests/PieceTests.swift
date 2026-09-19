@@ -42,7 +42,7 @@ struct CutCase: Codable, CustomTestStringConvertible {
         }
     }
 
-    var pieces: [Range<Int>] { equals.map { $0[0] ..< $0[1] } }
+    var pieces: [Range<Int>] { equals.map { $0[0]..<$0[1] } }
 }
 
 struct JoinCase: Codable, CustomTestStringConvertible {
@@ -59,7 +59,7 @@ struct JoinCase: Codable, CustomTestStringConvertible {
 
     var testDescription: String { name }
 
-    var ranges: [Range<Int>] { pieces.map { $0[0] ..< $0[1] } }
+    var ranges: [Range<Int>] { pieces.map { $0[0]..<$0[1] } }
     var transcripts: [[RecognizedWord]] { heard.map { $0.map(\.recognized) } }
     var reading: [RecognizedWord] { equals.map(\.recognized) }
 }
@@ -77,7 +77,7 @@ struct JoinRefusalCase: Codable, CustomTestStringConvertible {
 
     var testDescription: String { name }
 
-    var ranges: [Range<Int>] { pieces.map { $0[0] ..< $0[1] } }
+    var ranges: [Range<Int>] { pieces.map { $0[0]..<$0[1] } }
     var transcripts: [[RecognizedWord]] { heard.map { $0.map(\.recognized) } }
 }
 
@@ -114,11 +114,17 @@ struct PieceTests {
     func leavesNoSampleOutOfEveryPiece(cutCase: CutCase) {
         let pieces = Pieces.cuts(in: cutCase.samples, sampleRate: cutCase.sampleRate)
 
-        #expect(pieces.first?.lowerBound == 0, "\(cutCase.name): starts at \(pieces.first?.lowerBound ?? -1)")
+        #expect(
+            pieces.first?.lowerBound == 0,
+            "\(cutCase.name): starts at \(pieces.first?.lowerBound ?? -1)"
+        )
         #expect(pieces.last?.upperBound == cutCase.samples.count, "\(cutCase.name): ends short")
         for (earlier, later) in zip(pieces, pieces.dropFirst()) {
             #expect(later.lowerBound <= earlier.upperBound, "\(cutCase.name): a gap between pieces")
-            #expect(later.lowerBound > earlier.lowerBound, "\(cutCase.name): a piece that goes nowhere")
+            #expect(
+                later.lowerBound > earlier.lowerBound,
+                "\(cutCase.name): a piece that goes nowhere"
+            )
         }
     }
 
@@ -177,14 +183,17 @@ struct PieceTests {
         }
 
         #expect(words == Self.oneWord)
-        #expect(asked == [piece.count, piece.count - 1_600, piece.count - 3_200, piece.count - 4_800])
+        #expect(
+            asked == [piece.count, piece.count - 1_600, piece.count - 3_200, piece.count - 4_800]
+        )
     }
 
     @Test
     func leavesAPieceTooShortToExpectWordsFromAskedOnlyOnce() async {
         var asked = 0
 
-        let words = await Pieces.heard(of: Self.piece(ofSeconds: 1), sampleRate: Self.sampleRate) { _ in
+        let words = await Pieces.heard(of: Self.piece(ofSeconds: 1), sampleRate: Self.sampleRate) {
+            _ in
             asked += 1
             return []
         }
@@ -197,7 +206,8 @@ struct PieceTests {
     func answersNothingWhenNoTrimBringsWordsBack() async {
         var asked = 0
 
-        let words = await Pieces.heard(of: Self.piece(ofSeconds: 10), sampleRate: Self.sampleRate) { _ in
+        let words = await Pieces.heard(of: Self.piece(ofSeconds: 10), sampleRate: Self.sampleRate) {
+            _ in
             asked += 1
             return []
         }

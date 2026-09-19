@@ -10,7 +10,8 @@ let package = Package(
     products: [
         .library(
             name: "ReadAlign",
-            targets: ["ReadAlign"]),
+            targets: ["ReadAlign"]
+        )
     ],
     dependencies: [
         .package(url: "https://github.com/botforge-pro/swift-embed", from: "1.5.0"),
@@ -20,13 +21,15 @@ let package = Package(
         .target(
             name: "ReadAlign",
             dependencies: [.product(name: "SwiftEmbed", package: "swift-embed")],
-            resources: [.process("Resources")]),
+            resources: [.process("Resources")]
+        ),
         .testTarget(
             name: "ReadAlignTests",
             dependencies: [
                 "ReadAlign",
                 .product(name: "SwiftEmbed", package: "swift-embed")
             ],
-            resources: [.process("Resources")]),
+            resources: [.process("Resources")]
+        )
     ]
 )

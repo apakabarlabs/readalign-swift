@@ -55,18 +55,19 @@ public enum Pieces {
     /// model answers a different length with different words.
     public static func cuts(in samples: [Float], sampleRate: Double) -> [Range<Int>] {
         let longest = Int(Rules.shared.pieceSeconds * sampleRate)
-        guard samples.count > longest, longest > 0 else { return [0 ..< samples.count] }
+        guard samples.count > longest, longest > 0 else { return [0..<samples.count] }
         let shortest = Int(Rules.shared.pieceSeconds * Rules.shared.shortestPieceShare * sampleRate)
         let marks = pauses(in: samples, sampleRate: sampleRate)
 
         var pieces: [Range<Int>] = []
         var start = 0
         while samples.count - start > longest {
-            let cut = marks.last { $0 > start + shortest && $0 < start + longest } ?? start + longest
-            pieces.append(start ..< cut)
+            let cut =
+                marks.last { $0 > start + shortest && $0 < start + longest } ?? start + longest
+            pieces.append(start..<cut)
             start = marks.last { $0 < cut && $0 >= start + shortest } ?? cut
         }
-        pieces.append(start ..< samples.count)
+        pieces.append(start..<samples.count)
         return pieces
     }
 
@@ -138,7 +139,8 @@ public enum Pieces {
             for second in head.indices {
                 var run = 0
                 while first + run < tail.count, second + run < head.count,
-                      tail[first + run] == head[second + run] {
+                    tail[first + run] == head[second + run]
+                {
                     run += 1
                 }
                 if run > longest {
@@ -172,13 +174,13 @@ public enum Pieces {
     ) async rethrows -> [RecognizedWord] {
         let words = try await asking(piece)
         guard words.isEmpty,
-              Double(piece.count) / sampleRate >= Rules.shared.shortestWorthAskingAgain
+            Double(piece.count) / sampleRate >= Rules.shared.shortestWorthAskingAgain
         else { return words }
 
         for trim in Rules.shared.askAgainTrims {
             let shorter = piece.count - Int(trim * sampleRate)
             guard shorter > 0 else { break }
-            let again = try await asking(Array(piece[0 ..< shorter]))
+            let again = try await asking(Array(piece[0..<shorter]))
             if !again.isEmpty { return again }
         }
         return words

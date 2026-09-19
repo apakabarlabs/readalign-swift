@@ -17,6 +17,9 @@ disabled_rules:
   # the following line. Requiring the opposite makes `format` and `lint`
   # mutually destructive.
   - opening_brace
+  # swift-format puts parameters of a wrapped closure after the opening brace;
+  # SwiftLint's closure_parameter_position rule requires the opposite layout.
+  - closure_parameter_position
   # Wants the opening brace on a line of its own, which is neither how Swift is
   # written nor what the default `opening_brace` rule asks for. The two cannot
   # both be satisfied.

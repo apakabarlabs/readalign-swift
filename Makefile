@@ -12,13 +12,14 @@ install-tools:
 	$(COMMENTCENSOR_ENV)/bin/pip install --quiet --upgrade git+https://github.com/botforge-pro/commentcensor.git@$(COMMENTCENSOR_VERSION)
 
 format:
-	swift-format -i -r Sources Tests
+	swift-format format --in-place --recursive Sources Tests Package.swift
 
 comments:
 	$(COMMENTCENSOR) .
 
 lint: comments
 	swiftlint --strict
+	swift-format lint --strict --recursive Sources Tests Package.swift
 
 test:
 	swift test
@@ -34,7 +35,7 @@ docs:
 		--hosting-base-path readalign-swift
 
 lint-fix:
-	swiftlint --fix
+	$(MAKE) format
 
 build: lint test-build test docs
 	swift build
