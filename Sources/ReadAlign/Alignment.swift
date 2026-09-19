@@ -109,6 +109,15 @@ struct Alignment {
         return score
     }
 
+    func joinedExpectedSpan(in score: [[Double]], cell: Double, at position: (Int, Int)) -> Int? {
+        let (row, column) = position
+        guard row >= Self.pair else { return nil }
+        return (Self.pair...min(row, Rules.shared.vouchedJoinSpan)).first { span in
+            cell == score[row - span][column - 1]
+                + joinedExpected(row - 1, column - 1, span: span)
+        }
+    }
+
     func matches(in score: [[Double]]) -> [WordMatch] {
         var matches: [WordMatch] = []
         var (row, column) = (expected.count, heard.count)
@@ -144,13 +153,7 @@ struct Alignment {
                 }
                 row -= Self.pair
                 column -= Self.pair
-            } else if row >= Self.pair,
-                let span = (Self.pair...min(row, Rules.shared.vouchedJoinSpan)).first(where: {
-                    span in
-                    cell == score[row - span][column - 1]
-                        + joinedExpected(row - 1, column - 1, span: span)
-                })
-            {
+            } else if let span = joinedExpectedSpan(in: score, cell: cell, at: (row, column)) {
                 if joinedExpected(row - 1, column - 1, span: span) >= joinThreshold {
                     let back = (row - span)..<row
                     matches.append(WordMatch(expected: back, heard: (column - 1)..<column))
