@@ -81,14 +81,39 @@ struct JoinRefusalCase: Codable, CustomTestStringConvertible {
     var transcripts: [[RecognizedWord]] { heard.map { $0.map(\.recognized) } }
 }
 
+struct HeardCase: Codable, CustomTestStringConvertible {
+    let name: String
+    let sampleRate: Double
+    let waveform: [Stretch]
+    let answers: [[HeardWord]]
+    let askedLengths: [Int]
+    let equals: [HeardWord]
+
+    enum CodingKeys: String, CodingKey {
+        case name, waveform, answers, equals
+        case sampleRate = "sample_rate"
+        case askedLengths = "asked_lengths"
+    }
+
+    var testDescription: String { name }
+    var samples: [Float] {
+        waveform.flatMap { stretch in
+            [Float](repeating: stretch.level, count: Int((stretch.seconds * sampleRate).rounded()))
+        }
+    }
+    var transcripts: [[RecognizedWord]] { answers.map { $0.map(\.recognized) } }
+    var reading: [RecognizedWord] { equals.map(\.recognized) }
+}
+
 struct PieceFile: Codable {
     let pauses: [PauseCase]
     let cuts: [CutCase]
     let joins: [JoinCase]
     let joinRefusals: [JoinRefusalCase]
+    let heard: [HeardCase]
 
     enum CodingKeys: String, CodingKey {
-        case pauses, cuts, joins
+        case pauses, cuts, joins, heard
         case joinRefusals = "join_refusals"
     }
 }
@@ -148,6 +173,21 @@ struct PieceTests {
                 sampleRate: refusal.sampleRate
             )
         }
+    }
+
+    @Test(arguments: file.heard)
+    func recoversWhatTheCorpusSays(heardCase: HeardCase) async {
+        var answers = heardCase.transcripts
+        var asked: [Int] = []
+
+        let words = await Pieces.heard(of: heardCase.samples, sampleRate: heardCase.sampleRate) {
+            given in
+            asked.append(given.count)
+            return answers.removeFirst()
+        }
+
+        #expect(words == heardCase.reading, "\(heardCase.name): \(words)")
+        #expect(asked == heardCase.askedLengths, "\(heardCase.name): asked \(asked)")
     }
 
     private static let sampleRate = 16_000.0

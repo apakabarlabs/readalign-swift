@@ -48,11 +48,10 @@ public enum Pieces {
     /// enough for the runtime to take whole; where no pause falls there, it ends on length
     /// alone, because a piece that grows to find a pause is the very window this avoids.
     /// The next piece begins one pause earlier than the last ended, so every word is heard
-    /// whole by at least one of them. Where no pause offers itself the two meet edge to
-    /// edge and share nothing, which costs a word at that seam on a runtime that pads its
-    /// input; a floor on the overlap was measured against that and cost more than it
-    /// saved, because moving a piece changes the length of what the model is asked and this
-    /// model answers a different length with different words.
+    /// whole by at least one of them. Where no earlier pause offers the next piece a start,
+    /// the two would meet edge to edge and share nothing, which costs a word at that seam
+    /// on a runtime that pads its input. Only such an empty seam gets the standing
+    /// `edgeOverlap`; a floor that moved every shorter overlap was measured worse.
     public static func cuts(in samples: [Float], sampleRate: Double) -> [Range<Int>] {
         let longest = Int(Rules.shared.pieceSeconds * sampleRate)
         guard samples.count > longest, longest > 0 else { return [0..<samples.count] }
@@ -62,10 +61,12 @@ public enum Pieces {
         var pieces: [Range<Int>] = []
         var start = 0
         while samples.count - start > longest {
-            let cut =
-                marks.last { $0 > start + shortest && $0 < start + longest } ?? start + longest
+            let pause = marks.last { $0 > start + shortest && $0 < start + longest }
+            let cut = pause ?? start + longest
             pieces.append(start..<cut)
-            start = marks.last { $0 < cut && $0 >= start + shortest } ?? cut
+            start =
+                marks.last { $0 < cut && $0 >= start + shortest }
+                ?? max(start, cut - Int(Rules.shared.edgeOverlap * sampleRate))
         }
         pieces.append(start..<samples.count)
         return pieces
@@ -154,7 +155,7 @@ public enum Pieces {
         return Seam(keptAfterIt: tail.count - endsInTail, comingUpToIt: endsInHead)
     }
 
-    /// What one piece comes back as, asking again with less of its tail while nothing comes.
+    /// What one piece comes back as, recovering an empty or prematurely stopped answer.
     ///
     /// Parakeet answers some pieces of ordinary speech with no words at all, and whether it
     /// does turns on where the piece starts and how long it is together: the mel statistics
@@ -164,8 +165,12 @@ public enum Pieces {
     /// silent pays for the whole list before answering nothing, which is why a piece shorter
     /// than `shortest_worth_asking_again` is not asked again at all.
     ///
-    /// An answer won this way is missing whatever was said in the tail that was cut off. Each
-    /// piece the recording is cut into overlaps the next, and that overlap is what covers it.
+    /// A non-empty answer can also stop before speech resumes later in its audio. That tail
+    /// is asked again with already recognised context and accepted only when the two answers
+    /// share enough words to join without a duplicate.
+    ///
+    /// An empty answer won by trimming is missing whatever was said in the tail that was cut
+    /// off. Each piece overlaps the next, and that overlap is what covers it.
     /// Asking is `async` because every recogniser this is written for answers that way.
     public static func heard(
         of piece: [Float],
@@ -173,7 +178,10 @@ public enum Pieces {
         asking: ([Float]) async throws -> [RecognizedWord]
     ) async rethrows -> [RecognizedWord] {
         let words = try await asking(piece)
-        guard words.isEmpty,
+        if !words.isEmpty {
+            return try await recoveredTail(words, in: piece, sampleRate: sampleRate, asking: asking)
+        }
+        guard
             Double(piece.count) / sampleRate >= Rules.shared.shortestWorthAskingAgain
         else { return words }
 
@@ -184,6 +192,46 @@ public enum Pieces {
             if !again.isEmpty { return again }
         }
         return words
+    }
+
+    private static func recoveredTail(
+        _ words: [RecognizedWord],
+        in piece: [Float],
+        sampleRate: Double,
+        asking: ([Float]) async throws -> [RecognizedWord]
+    ) async rethrows -> [RecognizedWord] {
+        guard let last = words.last else { return words }
+        let frames = SilenceHold.energyFrames(of: piece, sampleRate: sampleRate)
+        let threshold = SilenceHold.speechThreshold(of: frames)
+        let firstFrame = Int(last.end / Rules.shared.frameSeconds)
+        var wentQuiet = false
+        var speechResumed = false
+        for energy in frames.dropFirst(firstFrame) {
+            if energy < threshold {
+                wentQuiet = true
+            } else if wentQuiet {
+                speechResumed = true
+                break
+            }
+        }
+        guard speechResumed else { return words }
+
+        let overlapFrom = max(0, last.start - Rules.shared.partialAnswerOverlap)
+        let start = Int(overlapFrom * sampleRate)
+        let offset = Double(start) / sampleRate
+        let coming = try await asking(Array(piece[start...])).map { word in
+            RecognizedWord(text: word.text, start: word.start + offset, end: word.end + offset)
+        }
+        var seam = agreement(words, coming, from: offset, upTo: Double(piece.count) / sampleRate)
+        if seam.comingUpToIt == 0,
+            let anchor = words.last,
+            let repeated = coming.first,
+            TranscriptAligner.normalize(anchor.text) == TranscriptAligner.normalize(repeated.text)
+        {
+            seam = Seam(keptAfterIt: 0, comingUpToIt: 1)
+        }
+        guard seam.comingUpToIt > 0 else { return words }
+        return Array(words.dropLast(seam.keptAfterIt)) + coming.dropFirst(seam.comingUpToIt)
     }
 }
 

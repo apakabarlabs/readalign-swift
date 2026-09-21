@@ -30,8 +30,10 @@ public struct Rules: Codable, Sendable {
     public let pieceSeconds: TimeInterval
     public let shortestPieceShare: Double
     public let pauseSeconds: TimeInterval
+    public let edgeOverlap: TimeInterval
     public let askAgainTrims: [TimeInterval]
     public let shortestWorthAskingAgain: TimeInterval
+    public let partialAnswerOverlap: TimeInterval
 
     enum CodingKeys: String, CodingKey {
         case matchThreshold = "match_threshold"
@@ -60,8 +62,10 @@ public struct Rules: Codable, Sendable {
         case pieceSeconds = "piece_seconds"
         case shortestPieceShare = "shortest_piece_share"
         case pauseSeconds = "pause_seconds"
+        case edgeOverlap = "edge_overlap"
         case askAgainTrims = "ask_again_trims"
         case shortestWorthAskingAgain = "shortest_worth_asking_again"
+        case partialAnswerOverlap = "partial_answer_overlap"
     }
 
     public static let shared: Rules = Embedded.getYAML(Bundle.module, path: "rules.yaml")

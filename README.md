@@ -74,7 +74,7 @@ Here rather than in each caller, because where one word ends is the model's conv
 
 ### Cutting a recording into pieces
 
-The other. A recogniser given a long reading cuts it into windows of its own, and every runtime cuts differently: a forty-second reading handed whole to one and in fifteen-second windows to another is two different questions, and the answers cannot be held against each other. `Pieces.cuts` returns the ranges to ask in, cut at the pauses `Pieces.pauses` finds and overlapping so that no word falls on a seam. Where no pause offers itself the piece ends on length alone, and then there is no overlap to give. Two pieces meeting that way share no ground and the join has nothing to settle them by, which costs a word at that seam on a runtime that pads its input to a fixed length: a recogniser invents a word while it is hearing the last of what it was given. A floor on the overlap was measured against that and is deliberately absent. Moving the start of a piece changes the length of what the model is asked, and this model answers a different length with different words, so a floor that lowers every seam under it — 223 of 631 over 154 readings, to mend the 57 that share nothing — costs more than it saves. A floor that applies only where the overlap is nothing has not been measured.
+The other. A recogniser given a long reading cuts it into windows of its own, and every runtime cuts differently: a forty-second reading handed whole to one and in fifteen-second windows to another is two different questions, and the answers cannot be held against each other. `Pieces.cuts` returns the ranges to ask in, cut at the pauses `Pieces.pauses` finds and overlapping so that no word falls on a seam. Where no pause offers itself the piece ends on length alone. A seam that would then share no audio gets `edge_overlap` seconds of common ground, so the join can remove boundary duplicates. This is not the floor measured and removed in 0.12.0: that floor moved every overlap shorter than itself, 223 of 631 seams over 154 readings. The current rule moves only the 57 seams that would otherwise have no overlap.
 
 A pause is found against the threshold the recording sets for itself: quiet is what stands well below its quietest tenth. A reading with hardly any silence in it therefore offers no pause at all and is cut on length, because there nothing stands out from that tenth.
 
@@ -86,11 +86,13 @@ The run is looked for anywhere inside the overlap rather than at its edges, beca
 
 Past the run the coming piece is believed and the piece before it is not. They cover the same seconds there, and the one that goes on past them heard them with what follows, while the other was hearing the last of what it was given — which is where a recogniser invents. So `we` above does not reach the reading at all.
 
-### When the recogniser answers nothing at all
+### When the recogniser answers nothing or stops early
 
 Parakeet answers some pieces of ordinary speech with no words at all. Whether it does turns on where the piece starts and how long it is together rather than on the speech in it: the mel statistics are taken over the piece, so its length moves them, and past some edge the decoder predicts blank at every frame. Handing over a little less of the tail moves the piece off that edge.
 
 `Pieces.heard` calls the recogniser for you and asks again while nothing comes back, taking `ask_again_trims` off the tail in turn and keeping the first answer with words in it. Measured over ten sonnets it gave back every silent piece. A piece shorter than `shortest_worth_asking_again` is asked once: nothing here tells speech from silence, so a piece that is genuinely quiet would otherwise pay for the whole list before answering nothing. What comes back is missing whatever was said in the trimmed tail, which the overlap with the next piece covers.
+
+A non-empty answer can stop just as completely halfway through its audio. When silence follows the last returned word and speech then resumes, `Pieces.heard` asks the tail again with `partial_answer_overlap` seconds of already recognised context. The shared words join the answers; without that agreement the retry is discarded rather than duplicating the transcript.
 
 ### Other languages
 
@@ -179,7 +181,7 @@ Two things it does not hold, and cannot, because neither reaches the result:
 ## Install
 
 ```swift
-.package(url: "https://github.com/apakabarlabs/readalign-swift", from: "0.13.1")
+.package(url: "https://github.com/apakabarlabs/readalign-swift", from: "0.14.0")
 ```
 
 Before 1.0, a minor release may change the API. Pin an exact version when that matters to you.

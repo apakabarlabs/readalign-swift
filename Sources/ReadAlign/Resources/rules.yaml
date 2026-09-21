@@ -122,6 +122,11 @@ shortest_piece_share: 0.5
 # a consonant, and cutting there takes a word in half.
 pause_seconds: 0.2
 
+# A seam with no shared audio gives the join nothing by which to remove a boundary
+# duplicate. Apply this only when the pause-based overlap is zero; raising every short
+# overlap to the same floor was measured worse.
+edge_overlap: 2.0
+
 # Two pieces may meet edge to edge, where no pause offers itself to begin the next one at,
 # and then they share no ground and the join has nothing to settle them by: a recogniser
 # invents a word while it is hearing the last of what it was given, and with nothing in
@@ -167,3 +172,7 @@ ask_again_trims: [0.1, 0.2, 0.3, 0.5, 0.8, 1.3]
 # Shorter than this and nothing heard is an answer rather than a defect: there is not
 # enough in the piece to expect words from it.
 shortest_worth_asking_again: 2.0
+
+# A non-empty answer can still stop while speech resumes later in the piece. Ask that
+# tail again with enough already-heard words to join the two answers by their text.
+partial_answer_overlap: 2.0
