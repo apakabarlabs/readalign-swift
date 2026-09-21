@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.17.0
+
+### Fixed
+- `Pieces.heard` recovers speech omitted at the beginning of an overlapping piece, but
+  only when that speech lies beyond the preceding piece's coverage. It asks the isolated
+  head through its last pause and uses the existing short-trim retries for unstable empty
+  answers.
+
 ## 0.16.0
 
 ### Fixed
