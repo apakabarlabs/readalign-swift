@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.17.1
+
+No behavioural changes. This release includes the 0.17.0 documentation that was added
+after the 0.17.0 tag.
+
 ## 0.17.0
 
 ### Fixed
