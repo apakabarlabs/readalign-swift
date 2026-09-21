@@ -106,7 +106,6 @@ public enum Pieces {
                 RecognizedWord(text: word.text, start: word.start + offset, end: word.end + offset)
             }
             let seam = agreement(reading, placed, from: offset, upTo: coveredTo)
-            reading.insert(contentsOf: placed.prefix(seam.comingBeforeIt), at: seam.insertionAt)
             reading.removeLast(seam.keptAfterIt)
             reading += placed.dropFirst(seam.comingUpToIt)
             coveredTo = Double(piece.upperBound) / sampleRate
@@ -117,20 +116,6 @@ public enum Pieces {
     struct Seam {
         let keptAfterIt: Int
         let comingUpToIt: Int
-        let insertionAt: Int
-        let comingBeforeIt: Int
-
-        init(
-            keptAfterIt: Int,
-            comingUpToIt: Int,
-            insertionAt: Int = 0,
-            comingBeforeIt: Int = 0
-        ) {
-            self.keptAfterIt = keptAfterIt
-            self.comingUpToIt = comingUpToIt
-            self.insertionAt = insertionAt
-            self.comingBeforeIt = comingBeforeIt
-        }
     }
 
     static func agreement(
@@ -139,7 +124,7 @@ public enum Pieces {
         from overlapFrom: Double,
         upTo coveredTo: Double
     ) -> Seam {
-        let nothing = Seam(keptAfterIt: 0, comingUpToIt: 0, insertionAt: kept.count)
+        let nothing = Seam(keptAfterIt: 0, comingUpToIt: 0)
         let tail = kept.drop { word in word.start < overlapFrom }.map { word in
             TranscriptAligner.normalize(word.text)
         }
@@ -149,8 +134,6 @@ public enum Pieces {
         guard !tail.isEmpty, !head.isEmpty else { return nothing }
 
         var longest = 0
-        var startsInTail = 0
-        var startsInHead = 0
         var endsInTail = 0
         var endsInHead = 0
         for first in tail.indices {
@@ -163,20 +146,13 @@ public enum Pieces {
                 }
                 if run > longest {
                     longest = run
-                    startsInTail = first
-                    startsInHead = second
                     endsInTail = first + run
                     endsInHead = second + run
                 }
             }
         }
         guard longest > 1 || longest == head.count else { return nothing }
-        return Seam(
-            keptAfterIt: tail.count - endsInTail,
-            comingUpToIt: endsInHead,
-            insertionAt: kept.count - tail.count + startsInTail,
-            comingBeforeIt: startsInHead
-        )
+        return Seam(keptAfterIt: tail.count - endsInTail, comingUpToIt: endsInHead)
     }
 
     /// What one piece comes back as, recovering an empty or prematurely stopped answer.

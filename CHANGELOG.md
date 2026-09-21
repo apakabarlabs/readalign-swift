@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.15.2
+
+### Fixed
+- Unmatched words before a shared seam run are discarded again. Keeping them in 0.15.0
+  preserved real words at isolated seams but preserved far more duplicated edge words
+  across the 154-recording corpus.
+
 ## 0.15.1
 
 ### Fixed
