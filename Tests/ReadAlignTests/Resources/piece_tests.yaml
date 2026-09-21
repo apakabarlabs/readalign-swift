@@ -197,7 +197,7 @@ joins:
       - {text: "distains", start: 1.25, end: 1.5}
       - {text: "disdains", start: 1.375, end: 1.625}
       - {text: "the", start: 1.75, end: 2.0}
-  - name: "an unmatched word before the seam agreement is discarded"
+  - name: "one word heard in the gap before the seam agreement is retained"
     sample_rate: 1000
     pieces: [[0, 2000], [1000, 3000]]
     heard:
@@ -212,9 +212,46 @@ joins:
         - {text: "next", start: 1.2, end: 1.5}
     equals:
       - {text: "so", start: 0.5, end: 0.75}
+      - {text: "How", start: 1.1, end: 1.25}
       - {text: "would", start: 1.3, end: 1.45}
       - {text: "I", start: 1.5, end: 1.6}
       - {text: "say", start: 1.65, end: 1.8}
+      - {text: "next", start: 2.2, end: 2.5}
+  - name: "a repeated edge word before the seam agreement is discarded"
+    sample_rate: 1000
+    pieces: [[0, 2000], [1000, 3000]]
+    heard:
+      - - {text: "die", start: 0.5, end: 0.75}
+        - {text: "but", start: 1.0, end: 1.2}
+        - {text: "as", start: 1.3, end: 1.45}
+        - {text: "the", start: 1.5, end: 1.6}
+      - - {text: "But", start: 0.05, end: 0.25}
+        - {text: "as", start: 0.3, end: 0.45}
+        - {text: "the", start: 0.5, end: 0.6}
+        - {text: "next", start: 1.2, end: 1.5}
+    equals:
+      - {text: "die", start: 0.5, end: 0.75}
+      - {text: "but", start: 1.0, end: 1.2}
+      - {text: "as", start: 1.3, end: 1.45}
+      - {text: "the", start: 1.5, end: 1.6}
+      - {text: "next", start: 2.2, end: 2.5}
+  - name: "a suffix of the edge word before the seam agreement is discarded"
+    sample_rate: 1000
+    pieces: [[0, 2000], [1000, 3000]]
+    heard:
+      - - {text: "and", start: 0.5, end: 0.75}
+        - {text: "almost", start: 1.0, end: 1.2}
+        - {text: "thence", start: 1.3, end: 1.45}
+        - {text: "my", start: 1.5, end: 1.6}
+      - - {text: "Most", start: 0.21, end: 0.29}
+        - {text: "thence", start: 0.3, end: 0.45}
+        - {text: "my", start: 0.5, end: 0.6}
+        - {text: "next", start: 1.2, end: 1.5}
+    equals:
+      - {text: "and", start: 0.5, end: 0.75}
+      - {text: "almost", start: 1.0, end: 1.2}
+      - {text: "thence", start: 1.3, end: 1.45}
+      - {text: "my", start: 1.5, end: 1.6}
       - {text: "next", start: 2.2, end: 2.5}
 
 # A transcript missing for a piece, or one too many, is refused rather than paired off

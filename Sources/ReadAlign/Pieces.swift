@@ -106,6 +106,9 @@ public enum Pieces {
                 RecognizedWord(text: word.text, start: word.start + offset, end: word.end + offset)
             }
             let seam = agreement(reading, placed, from: offset, upTo: coveredTo)
+            if let insertionAt = seam.insertionAt, let gapWord = seam.gapWord {
+                reading.insert(gapWord, at: insertionAt)
+            }
             reading.removeLast(seam.keptAfterIt)
             reading += placed.dropFirst(seam.comingUpToIt)
             coveredTo = Double(piece.upperBound) / sampleRate
@@ -116,6 +119,20 @@ public enum Pieces {
     struct Seam {
         let keptAfterIt: Int
         let comingUpToIt: Int
+        let insertionAt: Int?
+        let gapWord: RecognizedWord?
+
+        init(
+            keptAfterIt: Int,
+            comingUpToIt: Int,
+            insertionAt: Int? = nil,
+            gapWord: RecognizedWord? = nil
+        ) {
+            self.keptAfterIt = keptAfterIt
+            self.comingUpToIt = comingUpToIt
+            self.insertionAt = insertionAt
+            self.gapWord = gapWord
+        }
     }
 
     static func agreement(
@@ -134,6 +151,8 @@ public enum Pieces {
         guard !tail.isEmpty, !head.isEmpty else { return nothing }
 
         var longest = 0
+        var startsInTail = 0
+        var startsInHead = 0
         var endsInTail = 0
         var endsInHead = 0
         for first in tail.indices {
@@ -146,13 +165,30 @@ public enum Pieces {
                 }
                 if run > longest {
                     longest = run
+                    startsInTail = first
+                    startsInHead = second
                     endsInTail = first + run
                     endsInHead = second + run
                 }
             }
         }
         guard longest > 1 || longest == head.count else { return nothing }
-        return Seam(keptAfterIt: tail.count - endsInTail, comingUpToIt: endsInHead)
+        let agreementAt = kept.count - tail.count + startsInTail
+        let gapText = TranscriptAligner.normalize(coming[0].text)
+        let previousText =
+            agreementAt > 0
+            ? TranscriptAligner.normalize(kept[agreementAt - 1].text) : ""
+        let hasOneWordInGap =
+            startsInHead == 1 && agreementAt > 0
+            && coming[0].start >= kept[agreementAt - 1].end
+            && !gapText.isEmpty && !previousText.hasSuffix(gapText)
+            && !gapText.hasSuffix(previousText)
+        return Seam(
+            keptAfterIt: tail.count - endsInTail,
+            comingUpToIt: endsInHead,
+            insertionAt: hasOneWordInGap ? agreementAt : nil,
+            gapWord: hasOneWordInGap ? coming[0] : nil
+        )
     }
 
     /// What one piece comes back as, recovering an empty or prematurely stopped answer.
