@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.15.0
+
+### Fixed
+- `Pieces.heard` recovers speech before the first word of a non-empty answer, using a
+  shared word as the boundary just as trailing recovery does.
+- `Pieces.joined` retains words that only the coming piece heard before the shared seam
+  run. They used to be discarded together with the duplicate run.
+
 ## 0.14.0
 
 ### Fixed

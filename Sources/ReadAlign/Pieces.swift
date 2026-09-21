@@ -106,6 +106,7 @@ public enum Pieces {
                 RecognizedWord(text: word.text, start: word.start + offset, end: word.end + offset)
             }
             let seam = agreement(reading, placed, from: offset, upTo: coveredTo)
+            reading.insert(contentsOf: placed.prefix(seam.comingBeforeIt), at: seam.insertionAt)
             reading.removeLast(seam.keptAfterIt)
             reading += placed.dropFirst(seam.comingUpToIt)
             coveredTo = Double(piece.upperBound) / sampleRate
@@ -116,6 +117,20 @@ public enum Pieces {
     struct Seam {
         let keptAfterIt: Int
         let comingUpToIt: Int
+        let insertionAt: Int
+        let comingBeforeIt: Int
+
+        init(
+            keptAfterIt: Int,
+            comingUpToIt: Int,
+            insertionAt: Int = 0,
+            comingBeforeIt: Int = 0
+        ) {
+            self.keptAfterIt = keptAfterIt
+            self.comingUpToIt = comingUpToIt
+            self.insertionAt = insertionAt
+            self.comingBeforeIt = comingBeforeIt
+        }
     }
 
     static func agreement(
@@ -124,7 +139,7 @@ public enum Pieces {
         from overlapFrom: Double,
         upTo coveredTo: Double
     ) -> Seam {
-        let nothing = Seam(keptAfterIt: 0, comingUpToIt: 0)
+        let nothing = Seam(keptAfterIt: 0, comingUpToIt: 0, insertionAt: kept.count)
         let tail = kept.drop { word in word.start < overlapFrom }.map { word in
             TranscriptAligner.normalize(word.text)
         }
@@ -134,6 +149,8 @@ public enum Pieces {
         guard !tail.isEmpty, !head.isEmpty else { return nothing }
 
         var longest = 0
+        var startsInTail = 0
+        var startsInHead = 0
         var endsInTail = 0
         var endsInHead = 0
         for first in tail.indices {
@@ -146,13 +163,20 @@ public enum Pieces {
                 }
                 if run > longest {
                     longest = run
+                    startsInTail = first
+                    startsInHead = second
                     endsInTail = first + run
                     endsInHead = second + run
                 }
             }
         }
         guard longest > 1 || longest == head.count else { return nothing }
-        return Seam(keptAfterIt: tail.count - endsInTail, comingUpToIt: endsInHead)
+        return Seam(
+            keptAfterIt: tail.count - endsInTail,
+            comingUpToIt: endsInHead,
+            insertionAt: kept.count - tail.count + startsInTail,
+            comingBeforeIt: startsInHead
+        )
     }
 
     /// What one piece comes back as, recovering an empty or prematurely stopped answer.
@@ -179,7 +203,18 @@ public enum Pieces {
     ) async rethrows -> [RecognizedWord] {
         let words = try await asking(piece)
         if !words.isEmpty {
-            return try await recoveredTail(words, in: piece, sampleRate: sampleRate, asking: asking)
+            let withHead = try await recoveredHead(
+                words,
+                in: piece,
+                sampleRate: sampleRate,
+                asking: asking
+            )
+            return try await recoveredTail(
+                withHead,
+                in: piece,
+                sampleRate: sampleRate,
+                asking: asking
+            )
         }
         guard
             Double(piece.count) / sampleRate >= Rules.shared.shortestWorthAskingAgain
@@ -192,6 +227,44 @@ public enum Pieces {
             if !again.isEmpty { return again }
         }
         return words
+    }
+
+    private static func recoveredHead(
+        _ words: [RecognizedWord],
+        in piece: [Float],
+        sampleRate: Double,
+        asking: ([Float]) async throws -> [RecognizedWord]
+    ) async rethrows -> [RecognizedWord] {
+        guard let first = words.first else { return words }
+        let frames = SilenceHold.energyFrames(of: piece, sampleRate: sampleRate)
+        let threshold = SilenceHold.speechThreshold(of: frames)
+        let lastFrame = min(Int(first.start / Rules.shared.frameSeconds), frames.count)
+        var heardSpeech = false
+        var wentQuiet = false
+        for energy in frames.prefix(lastFrame) {
+            if energy >= threshold {
+                heardSpeech = true
+            } else if heardSpeech {
+                wentQuiet = true
+            }
+        }
+        guard wentQuiet else { return words }
+
+        let through = min(
+            piece.count,
+            Int((first.end + Rules.shared.partialAnswerOverlap) * sampleRate)
+        )
+        let recovered = try await asking(Array(piece[..<through]))
+        var seam = agreement(recovered, words, from: 0, upTo: Double(through) / sampleRate)
+        if seam.comingUpToIt == 0,
+            let anchor = recovered.last,
+            let repeated = words.first,
+            TranscriptAligner.normalize(anchor.text) == TranscriptAligner.normalize(repeated.text)
+        {
+            seam = Seam(keptAfterIt: 0, comingUpToIt: 1)
+        }
+        guard seam.comingUpToIt > 0 else { return words }
+        return Array(recovered.dropLast(seam.keptAfterIt)) + words.dropFirst(seam.comingUpToIt)
     }
 
     private static func recoveredTail(
