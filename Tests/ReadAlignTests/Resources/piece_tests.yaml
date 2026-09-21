@@ -253,6 +253,22 @@ joins:
       - {text: "thence", start: 1.3, end: 1.45}
       - {text: "my", start: 1.5, end: 1.6}
       - {text: "next", start: 2.2, end: 2.5}
+  - name: "a word overlapping the seam agreement is discarded"
+    sample_rate: 1000
+    pieces: [[0, 2500], [1000, 3000]]
+    heard:
+      - - {text: "youth", start: 1.5, end: 1.83}
+        - {text: "Who", start: 1.99, end: 2.2}
+        - {text: "lead", start: 2.3, end: 2.45}
+      - - {text: "them", start: 0.85, end: 1.17}
+        - {text: "Who", start: 0.99, end: 1.2}
+        - {text: "lead", start: 1.3, end: 1.45}
+        - {text: "next", start: 1.6, end: 1.8}
+    equals:
+      - {text: "youth", start: 1.5, end: 1.83}
+      - {text: "Who", start: 1.99, end: 2.2}
+      - {text: "lead", start: 2.3, end: 2.45}
+      - {text: "next", start: 2.6, end: 2.8}
 
 # A transcript missing for a piece, or one too many, is refused rather than paired off
 # until the shorter of the two runs out: every word after the missing one would be placed

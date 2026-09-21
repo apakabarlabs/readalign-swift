@@ -181,6 +181,7 @@ public enum Pieces {
         let hasOneWordInGap =
             startsInHead == 1 && agreementAt > 0
             && coming[0].start >= kept[agreementAt - 1].end
+            && (coming[0].start + coming[0].end) / Double(halves) < kept[agreementAt].start
             && !gapText.isEmpty && !previousText.hasSuffix(gapText)
             && !gapText.hasSuffix(previousText)
         return Seam(
