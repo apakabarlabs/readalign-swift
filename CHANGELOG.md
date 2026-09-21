@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.16.0
+
+### Fixed
+- `Pieces.joined` retains one distinct word that lies wholly in the gap before a shared
+  seam run. It no longer loses a real word heard only by the coming piece, while words
+  overlapping the agreement and repeated or partial edge words are still discarded.
+
 ## 0.15.2
 
 ### Fixed
