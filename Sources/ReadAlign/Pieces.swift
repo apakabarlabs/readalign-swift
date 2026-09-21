@@ -203,14 +203,8 @@ public enum Pieces {
     ) async rethrows -> [RecognizedWord] {
         let words = try await asking(piece)
         if !words.isEmpty {
-            let withHead = try await recoveredHead(
-                words,
-                in: piece,
-                sampleRate: sampleRate,
-                asking: asking
-            )
             return try await recoveredTail(
-                withHead,
+                words,
                 in: piece,
                 sampleRate: sampleRate,
                 asking: asking
@@ -227,44 +221,6 @@ public enum Pieces {
             if !again.isEmpty { return again }
         }
         return words
-    }
-
-    private static func recoveredHead(
-        _ words: [RecognizedWord],
-        in piece: [Float],
-        sampleRate: Double,
-        asking: ([Float]) async throws -> [RecognizedWord]
-    ) async rethrows -> [RecognizedWord] {
-        guard let first = words.first else { return words }
-        let frames = SilenceHold.energyFrames(of: piece, sampleRate: sampleRate)
-        let threshold = SilenceHold.speechThreshold(of: frames)
-        let lastFrame = min(Int(first.start / Rules.shared.frameSeconds), frames.count)
-        var heardSpeech = false
-        var wentQuiet = false
-        for energy in frames.prefix(lastFrame) {
-            if energy >= threshold {
-                heardSpeech = true
-            } else if heardSpeech {
-                wentQuiet = true
-            }
-        }
-        guard wentQuiet else { return words }
-
-        let through = min(
-            piece.count,
-            Int((first.end + Rules.shared.partialAnswerOverlap) * sampleRate)
-        )
-        let recovered = try await asking(Array(piece[..<through]))
-        var seam = agreement(recovered, words, from: 0, upTo: Double(through) / sampleRate)
-        if seam.comingUpToIt == 0,
-            let anchor = recovered.last,
-            let repeated = words.first,
-            TranscriptAligner.normalize(anchor.text) == TranscriptAligner.normalize(repeated.text)
-        {
-            seam = Seam(keptAfterIt: 0, comingUpToIt: 1)
-        }
-        guard seam.comingUpToIt > 0 else { return words }
-        return Array(recovered.dropLast(seam.keptAfterIt)) + words.dropFirst(seam.comingUpToIt)
     }
 
     private static func recoveredTail(

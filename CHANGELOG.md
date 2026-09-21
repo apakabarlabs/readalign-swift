@@ -1,10 +1,15 @@
 # Changelog
 
+## 0.15.1
+
+### Fixed
+- A non-empty answer is no longer asked again merely because speech precedes its first
+  word. The 0.15.0 recovery did not recover the measured missing beginnings and changed
+  104 of 154 server readings and 139 of 154 Apple readings for the worse.
+
 ## 0.15.0
 
 ### Fixed
-- `Pieces.heard` recovers speech before the first word of a non-empty answer, using a
-  shared word as the boundary just as trailing recovery does.
 - `Pieces.joined` retains words that only the coming piece heard before the shared seam
   run. They used to be discarded together with the duplicate run.
 

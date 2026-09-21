@@ -237,7 +237,7 @@ join_refusals:
 # Recovering a recogniser answer that stopped before later speech in the same piece.
 # `answers` are returned in order, once for each request made by `Pieces.heard`.
 heard:
-  - name: "an answer missing its spoken beginning is recovered with one context word"
+  - name: "earlier speech does not replace a nonempty answer"
     sample_rate: 100
     waveform:
       - {level: 0.1, seconds: 3.0}
@@ -248,9 +248,8 @@ heard:
         - {text: "after", start: 7.0, end: 8.0}
       - - {text: "before", start: 1.0, end: 2.0}
         - {text: "anchor", start: 5.0, end: 6.0}
-    asked_lengths: [1000, 800]
+    asked_lengths: [1000]
     equals:
-      - {text: "before", start: 1.0, end: 2.0}
       - {text: "anchor", start: 5.0, end: 6.0}
       - {text: "after", start: 7.0, end: 8.0}
   - name: "a stopped answer is recovered without repeating its two context words"
