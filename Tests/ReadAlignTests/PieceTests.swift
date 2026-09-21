@@ -84,6 +84,7 @@ struct JoinRefusalCase: Codable, CustomTestStringConvertible {
 struct HeardCase: Codable, CustomTestStringConvertible {
     let name: String
     let sampleRate: Double
+    let coveredPrefix: TimeInterval?
     let waveform: [Stretch]
     let answers: [[HeardWord]]
     let askedLengths: [Int]
@@ -92,6 +93,7 @@ struct HeardCase: Codable, CustomTestStringConvertible {
     enum CodingKeys: String, CodingKey {
         case name, waveform, answers, equals
         case sampleRate = "sample_rate"
+        case coveredPrefix = "covered_prefix"
         case askedLengths = "asked_lengths"
     }
 
@@ -180,8 +182,11 @@ struct PieceTests {
         var answers = heardCase.transcripts
         var asked: [Int] = []
 
-        let words = await Pieces.heard(of: heardCase.samples, sampleRate: heardCase.sampleRate) {
-            given in
+        let words = await Pieces.heard(
+            of: heardCase.samples,
+            sampleRate: heardCase.sampleRate,
+            coveredPrefix: heardCase.coveredPrefix ?? 0
+        ) { given in
             asked.append(given.count)
             return answers.removeFirst()
         }

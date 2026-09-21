@@ -212,12 +212,20 @@ public enum Pieces {
     public static func heard(
         of piece: [Float],
         sampleRate: Double,
+        coveredPrefix: TimeInterval = 0,
         asking: ([Float]) async throws -> [RecognizedWord]
     ) async rethrows -> [RecognizedWord] {
         let words = try await asking(piece)
         if !words.isEmpty {
-            return try await recoveredTail(
+            let withHead = try await recoveredHead(
                 words,
+                in: piece,
+                sampleRate: sampleRate,
+                coveredPrefix: coveredPrefix,
+                asking: asking
+            )
+            return try await recoveredTail(
+                withHead,
                 in: piece,
                 sampleRate: sampleRate,
                 asking: asking
@@ -231,7 +239,21 @@ public enum Pieces {
             let shorter = piece.count - Int(trim * sampleRate)
             guard shorter > 0 else { break }
             let again = try await asking(Array(piece[0..<shorter]))
-            if !again.isEmpty { return again }
+            if !again.isEmpty {
+                let withHead = try await recoveredHead(
+                    again,
+                    in: piece,
+                    sampleRate: sampleRate,
+                    coveredPrefix: coveredPrefix,
+                    asking: asking
+                )
+                return try await recoveredTail(
+                    withHead,
+                    in: piece,
+                    sampleRate: sampleRate,
+                    asking: asking
+                )
+            }
         }
         return words
     }

@@ -33,6 +33,7 @@ public struct Rules: Codable, Sendable {
     public let edgeOverlap: TimeInterval
     public let askAgainTrims: [TimeInterval]
     public let shortestWorthAskingAgain: TimeInterval
+    public let uncoveredHeadSeconds: TimeInterval
     public let partialAnswerOverlap: TimeInterval
 
     enum CodingKeys: String, CodingKey {
@@ -65,6 +66,7 @@ public struct Rules: Codable, Sendable {
         case edgeOverlap = "edge_overlap"
         case askAgainTrims = "ask_again_trims"
         case shortestWorthAskingAgain = "shortest_worth_asking_again"
+        case uncoveredHeadSeconds = "uncovered_head_seconds"
         case partialAnswerOverlap = "partial_answer_overlap"
     }
 
