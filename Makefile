@@ -1,6 +1,13 @@
 .DEFAULT_GOAL := build
 
-.PHONY: install-tools format comments lint test-build test docs build clean install
+.PHONY: install-tools format comments lint test-build test docs build clean install sync-yaml
+
+sync-yaml:
+	mkdir -p ../readalign-kotlin/src/main/resources/fm/apakabar/readalign ../readalign-kotlin/src/test/resources
+	cp Sources/ReadAlign/Resources/rules.yaml ../readalign-kotlin/src/main/resources/fm/apakabar/readalign/
+	cp Tests/ReadAlignTests/Resources/*.yaml ../readalign-kotlin/src/test/resources/
+	cp Sources/ReadAlign/Resources/rules.yaml ../readalign-python/readalign/rules.yaml
+	cp Tests/ReadAlignTests/Resources/*.yaml ../readalign-python/tests/cases/
 
 install-tools:
 	brew install swiftlint swift-format
