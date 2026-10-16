@@ -143,6 +143,38 @@ tests:
         want:
           - {word: 1, start: 0.34, end: 0.80}
 
+      - name: "an edge that would move by exactly the least widening moves"
+        why: >
+          The limit holds both edges to thirty milliseconds, which is the least
+          widening itself. The distance is counted in samples, so every port answers
+          the same at the boundary instead of on which side a float rounded: in
+          seconds, 0.35 less 0.32 comes out just short of 0.03.
+        sample_rate: 16000
+        limit: 0.03
+        waveform:
+          - {level: 0.001, seconds: 0.35}
+          - {level: 0.5, seconds: 0.10}
+          - {level: 0.001, seconds: 0.35}
+        spans:
+          - {start: 0.35, end: 0.45}
+        want:
+          - {word: 0, start: 0.32, end: 0.48}
+
+      - name: "an edge that would move by a sample less than the least widening stays"
+        why: >
+          One millisecond short of the least widening, and both edges stay on their
+          marks.
+        sample_rate: 1000
+        limit: 0.029
+        waveform:
+          - {level: 0.001, seconds: 1.00}
+          - {level: 0.5, seconds: 0.10}
+          - {level: 0.001, seconds: 1.00}
+        spans:
+          - {start: 1.00, end: 1.10}
+        want:
+          - {word: 0, start: 1.00, end: 1.10}
+
   - section: "The edges of the recording and the standing limit"
     cases:
       - name: "neither edge passes the ends of the recording"

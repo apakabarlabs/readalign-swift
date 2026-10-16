@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.20.0
+
+### Fixed
+- `SilenceHold.widened` counts the distance an edge would move in samples before it holds
+  it to `least_widening`. Counted in seconds, an edge exactly 30 ms away could come out
+  a hair short of it and stay, and which way it fell depended on the float.
+
 ## 0.19.0
 
 ### Changed
