@@ -1,0 +1,150 @@
+# Widening a word to the quiet on both sides of it.
+#
+# A case describes the recording the way the hold corpus does: stretches of a
+# level and a length, built into samples by every port for itself.
+#
+# A recogniser marks a word from where it is sure of it, which is past the
+# consonant it opens with: the burst of a "c" or a "ch" is quieter than the voice
+# and comes before the vowel the recogniser locks on to. Cut at the mark, "crime"
+# is heard as "prime" and "cheat" as "sheet". So the start goes back over the
+# quiet before the word, and the end on over the quiet after it, and the
+# consonant comes back with the quiet it sits in.
+#
+# Here the room is 0.001, a voice 0.5, and a consonant's burst 0.003: louder
+# than the room and still below what the rules count as speech.
+tests:
+  - section: "A word given back the quiet around it"
+    cases:
+      - name: "the consonant before the mark is given back to the word"
+        why: >
+          The burst sits between the pause and the vowel, below speech, and the mark
+          falls on the vowel. The start goes back over the burst and the pause, and
+          the end of the word before comes forward over the same pause, until the
+          two meet at its middle, so neither word takes a frame of the other's.
+        sample_rate: 1000
+        waveform:
+          - {level: 0.5, seconds: 0.10}
+          - {level: 0.001, seconds: 0.20}
+          - {level: 0.003, seconds: 0.05}
+          - {level: 0.5, seconds: 0.15}
+          - {level: 0.001, seconds: 0.20}
+        spans:
+          - {start: 0.00, end: 0.10}
+          - {start: 0.35, end: 0.50}
+        want:
+          - {word: 0, end: 0.225}
+          - {word: 1, start: 0.225}
+
+      - name: "the start goes back no further than where the word before stops sounding"
+        why: >
+          The word before was marked short, so the middle of the gap between the
+          marks lies inside its sound. The start goes back over the burst and the
+          pause and stops where that sound is still going: the quiet is this word's,
+          the sound before it is not.
+        sample_rate: 1000
+        waveform:
+          - {level: 0.5, seconds: 0.30}
+          - {level: 0.001, seconds: 0.10}
+          - {level: 0.003, seconds: 0.05}
+          - {level: 0.5, seconds: 0.15}
+          - {level: 0.001, seconds: 0.10}
+        spans:
+          - {start: 0.00, end: 0.05}
+          - {start: 0.45, end: 0.60}
+        want:
+          - {word: 1, start: 0.30}
+
+      - name: "the end goes on no further than where the word after starts sounding"
+        why: >
+          The same from the other side: the word after was marked late, so the
+          middle of the gap lies inside its sound, and the end stops where that
+          sound begins.
+        sample_rate: 1000
+        waveform:
+          - {level: 0.001, seconds: 0.10}
+          - {level: 0.5, seconds: 0.15}
+          - {level: 0.001, seconds: 0.10}
+          - {level: 0.5, seconds: 0.30}
+        spans:
+          - {start: 0.10, end: 0.25}
+          - {start: 0.60, end: 0.65}
+        want:
+          - {word: 0, end: 0.35}
+
+      - name: "words with no quiet between them keep their marks"
+        why: >
+          The voice never drops between the two, so there is no pause to give either
+          of them, and the gap between the marks is the recogniser's to answer for.
+          Walking into it would hand one word the sound of the other.
+        sample_rate: 1000
+        waveform:
+          - {level: 0.001, seconds: 0.10}
+          - {level: 0.5, seconds: 0.60}
+          - {level: 0.001, seconds: 0.10}
+        spans:
+          - {start: 0.10, end: 0.35}
+          - {start: 0.45, end: 0.70}
+        want:
+          - {word: 0, end: 0.35}
+          - {word: 1, start: 0.45}
+
+      - name: "words whose marks overlap keep them where they meet"
+        why: >
+          Two written words matched to one heard token come back sharing its
+          stretch. There is no gap between them to divide, so the edges they share
+          stay where they are.
+        sample_rate: 1000
+        waveform:
+          - {level: 0.001, seconds: 0.10}
+          - {level: 0.5, seconds: 0.40}
+          - {level: 0.001, seconds: 0.10}
+        spans:
+          - {start: 0.10, end: 0.35}
+          - {start: 0.25, end: 0.50}
+        want:
+          - {word: 0, end: 0.35}
+          - {word: 1, start: 0.25}
+
+  - section: "The edges of the recording and the standing limit"
+    cases:
+      - name: "neither edge passes the ends of the recording"
+        why: >
+          One word, its mark inside its own sound, with a little quiet before it and
+          after it. Its own sound past the mark is walked through, then the quiet,
+          and both edges stop at the ends of the recording.
+        sample_rate: 1000
+        waveform:
+          - {level: 0.001, seconds: 0.10}
+          - {level: 0.003, seconds: 0.05}
+          - {level: 0.5, seconds: 0.25}
+          - {level: 0.001, seconds: 0.05}
+        spans:
+          - {start: 0.20, end: 0.30}
+        want:
+          - {word: 0, start: 0.00, end: 0.45}
+
+      - name: "a word reaches into the quiet no further than the standing limit"
+        why: >
+          A long pause on either side and nothing beyond it, so only the limit the
+          rules carry stops either edge. Otherwise a word after a pause between
+          stanzas would be cut with the whole pause in front of it.
+        sample_rate: 1000
+        limit: 0.2
+        waveform:
+          - {level: 0.001, seconds: 1.00}
+          - {level: 0.5, seconds: 0.10}
+          - {level: 0.001, seconds: 1.00}
+        spans:
+          - {start: 1.00, end: 1.10}
+        want:
+          - {word: 0, start: 0.80, end: 1.30}
+
+      - name: "a recording with nothing in it leaves the marks alone"
+        why: >
+          Nothing to measure the room against, so nothing is moved.
+        sample_rate: 16000
+        waveform: []
+        spans:
+          - {start: 0.05, end: 0.10}
+        want:
+          - {word: 0, start: 0.05, end: 0.10}

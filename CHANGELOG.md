@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.18.0
+
+### Added
+- `SilenceHold.widened` gives each word the quiet on both sides of it. A start goes
+  back through the quiet before the word and an end on through the quiet after it,
+  stopping where the recording speaks again, at the middle of the gap to the
+  neighbouring mark, at the ends of the recording, or at `hold_limit` from its own
+  mark. A cut along these edges keeps the opening consonant a recogniser leaves
+  outside its mark, so `crime` is no longer heard as `prime`.
+
 ## 0.17.1
 
 No behavioural changes. This release includes the 0.17.0 documentation that was added
