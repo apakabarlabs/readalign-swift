@@ -97,6 +97,13 @@ quietest_room: 0.0001
 # How far past its own mark a word may be held.
 hold_limit: 0.6
 
+# Less than this and a widened edge stays on its mark. Two frames move nothing a listener
+# hears, but they change what a recogniser hears in the cut: over six thousand trainer
+# words, edges moved by a few milliseconds lost as many words to the recogniser as they
+# won, and the owner heard every such pair as the same word. Fifty milliseconds starts to
+# take the burst of a short consonant back off, and gained little over thirty.
+least_widening: 0.03
+
 # How loud this recording speaks, taken as the mean of its loudest share. Speech
 # occupies rather more than half of a reading, so half lands inside the voice
 # rather than on its peaks, and one reader recorded hotter than another is

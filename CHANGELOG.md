@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.19.0
+
+### Changed
+- `SilenceHold.widened` leaves an edge on its mark when it would move by less than
+  `least_widening` (30 ms), each edge judged on its own. Over six thousand trainer
+  words, edges moved by a few milliseconds lost as many words to the recogniser as they
+  won and sounded the same.
+
 ## 0.18.0
 
 ### Added

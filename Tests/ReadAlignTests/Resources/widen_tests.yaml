@@ -105,6 +105,44 @@ tests:
           - {word: 0, end: 0.35}
           - {word: 1, start: 0.25}
 
+      - name: "an edge that would move by less than the least widening stays on its mark"
+        why: >
+          Twenty milliseconds is two frames, which no listener hears and every
+          recogniser answers differently: a cut moved that little changes what comes
+          back without changing what is said. The gap between the two words gives
+          each of them ten milliseconds, so neither edge moves.
+        sample_rate: 1000
+        waveform:
+          - {level: 0.001, seconds: 0.10}
+          - {level: 0.5, seconds: 0.20}
+          - {level: 0.001, seconds: 0.02}
+          - {level: 0.5, seconds: 0.20}
+          - {level: 0.001, seconds: 0.10}
+        spans:
+          - {start: 0.10, end: 0.30}
+          - {start: 0.32, end: 0.52}
+        want:
+          - {word: 0, end: 0.30}
+          - {word: 1, start: 0.32}
+
+      - name: "each edge is weighed on its own"
+        why: >
+          The quiet before the word is too short to give it anything, the quiet after
+          it is long. The start stays on its mark and the end still goes on, rather
+          than the word being left alone because one side had nothing to give.
+        sample_rate: 1000
+        waveform:
+          - {level: 0.001, seconds: 0.10}
+          - {level: 0.5, seconds: 0.20}
+          - {level: 0.001, seconds: 0.04}
+          - {level: 0.5, seconds: 0.16}
+          - {level: 0.001, seconds: 0.30}
+        spans:
+          - {start: 0.10, end: 0.30}
+          - {start: 0.34, end: 0.50}
+        want:
+          - {word: 1, start: 0.34, end: 0.80}
+
   - section: "The edges of the recording and the standing limit"
     cases:
       - name: "neither edge passes the ends of the recording"

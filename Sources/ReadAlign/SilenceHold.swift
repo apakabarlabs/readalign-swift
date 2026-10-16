@@ -44,7 +44,8 @@ public enum SilenceHold {
     /// same way. Neither passes the middle of the gap to the neighbouring mark, the ends
     /// of the recording, or `limit` from its own mark. An edge that meets no quiet before
     /// one of those stays where it was: with no pause between two words there is nothing
-    /// to give either of them.
+    /// to give either of them. So does an edge that would move by less than
+    /// `least_widening`, each edge judged on its own.
     public static func widened(
         _ spans: [WordSpan],
         samples: [Float],
@@ -95,9 +96,10 @@ public enum SilenceHold {
                 frame += 1
             }
 
+            let least = Rules.shared.leastWidening
             return WordSpan(
-                start: wentQuiet ? min(start, span.start) : span.start,
-                end: endWentQuiet ? max(end, span.end) : span.end
+                start: wentQuiet && span.start - start >= least ? start : span.start,
+                end: endWentQuiet && end - span.end >= least ? end : span.end
             )
         }
     }

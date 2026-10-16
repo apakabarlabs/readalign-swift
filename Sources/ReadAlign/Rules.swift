@@ -24,6 +24,7 @@ public struct Rules: Codable, Sendable {
     public let speechAboveRoom: Double
     public let quietestRoom: Double
     public let holdLimit: TimeInterval
+    public let leastWidening: TimeInterval
     public let speechFromLoudestShare: Double
     public let quietestSpeech: Double
 
@@ -58,6 +59,7 @@ public struct Rules: Codable, Sendable {
         case speechAboveRoom = "speech_above_room"
         case quietestRoom = "quietest_room"
         case holdLimit = "hold_limit"
+        case leastWidening = "least_widening"
         case speechFromLoudestShare = "speech_from_loudest_share"
         case quietestSpeech = "quietest_speech"
         case pieceSeconds = "piece_seconds"
