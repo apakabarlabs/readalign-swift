@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := build
 
-.PHONY: install-tools format comments lint test-build test docs build clean install sync-yaml
+.PHONY: install-tools format comments lint test-build test docs build install sync-yaml
 
 sync-yaml:
 	mkdir -p ../readalign-kotlin/src/main/resources/fm/apakabar/readalign ../readalign-kotlin/src/test/resources
@@ -41,10 +41,6 @@ lint-fix:
 
 build: lint test-build test docs
 	swift build
-
-clean:
-	swift package clean
-	rm -rf .build
 
 install:
 	$(MAKE) install-tools
