@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.21.0
+
+### Changed
+- `SilenceHold.speechThreshold` counts nothing quieter than `quiet_below_voice` (2%) of the voice as speech,
+  however quiet the room. A synthesised reading with stretches of exact zero set its room
+  at zero, and the hiss of every pause between words passed for speech. None of 154
+  recorded sonnets has its threshold below 3% of the voice, so they cut as before.
+- `SilenceHold.widened` moves the edge two words marked edge to edge share into the middle of the
+  nearest pause within `hold_limit` when the edge falls inside a sound, no further than
+  the middle of either word. A list read in one breath comes back marked edge to edge,
+  and the next word's opening `s` or `f` sounds before its mark: cut there, the earlier
+  word ended on it.
+
 ## 0.20.0
 
 ### Fixed

@@ -46,6 +46,12 @@ public enum SilenceHold {
     /// one of those stays where it was: with no pause between two words there is nothing
     /// to give either of them. So does an edge that would move by less than
     /// `least_widening`, each edge judged on its own and the distance counted in samples.
+    ///
+    /// Two words marked edge to edge share that edge, and where it falls inside a sound it
+    /// goes first to the middle of the nearest pause within `limit`, as two words with a gap
+    /// between their marks meet there: the recogniser marks a word from where it is sure of it, so the opening hiss
+    /// of the next word sounds before its mark. It goes no further than the middle of
+    /// either word, so a short word keeps the pause after it.
     public static func widened(
         _ spans: [WordSpan],
         samples: [Float],
@@ -58,6 +64,7 @@ public enum SilenceHold {
         let size = max(Int(Rules.shared.frameSeconds * sampleRate), 1)
         let eachFrame = Double(size) / sampleRate
         let duration = Double(samples.count) / sampleRate
+        let spans = settled(spans, in: frames, at: sampleRate, within: limit)
 
         return spans.indices.map { index in
             let span = spans[index]
@@ -106,6 +113,67 @@ public enum SilenceHold {
         }
     }
 
+    private static func settled(
+        _ spans: [WordSpan],
+        in frames: [Double],
+        at sampleRate: Double,
+        within limit: TimeInterval
+    ) -> [WordSpan] {
+        let threshold = speechThreshold(of: frames)
+        let eachFrame = Double(max(Int(Rules.shared.frameSeconds * sampleRate), 1)) / sampleRate
+        let pauses = quietRuns(
+            frames,
+            threshold: threshold,
+            atLeast: max(Int((Rules.shared.pauseSeconds / eachFrame).rounded()), 1)
+        )
+        var settled = spans
+        for index in settled.indices.dropLast() {
+            let word = settled[index]
+            let following = settled[index + 1]
+            guard (word.end * sampleRate).rounded() == (following.start * sampleRate).rounded()
+            else { continue }
+            let seam = following.start
+            let frame = Int((seam / eachFrame).rounded())
+            guard frame > 0, frame < frames.count,
+                frames[frame - 1] >= threshold, frames[frame] >= threshold
+            else { continue }
+            let lowest = (word.start + seam) / 2
+            let highest = (following.start + following.end) / 2
+            let reachable = pauses.compactMap {
+                run -> (distance: TimeInterval, middle: TimeInterval)? in
+                let quietFrom = Double(run.lowerBound) * eachFrame
+                let quietUntil = Double(run.upperBound) * eachFrame
+                let distance = quietUntil <= seam ? seam - quietUntil : quietFrom - seam
+                let middle = (quietFrom + quietUntil) / 2
+                guard distance <= limit, middle >= lowest, middle <= highest else { return nil }
+                return (distance, middle)
+            }
+            guard let nearest = reachable.min(by: { $0.distance < $1.distance }) else { continue }
+            settled[index] = WordSpan(start: word.start, end: nearest.middle)
+            settled[index + 1] = WordSpan(start: nearest.middle, end: following.end)
+        }
+        return settled
+    }
+
+    private static func quietRuns(
+        _ frames: [Double],
+        threshold: Double,
+        atLeast: Int
+    ) -> [Range<Int>] {
+        var runs: [Range<Int>] = []
+        var start: Int?
+        for (index, energy) in frames.enumerated() {
+            if energy < threshold {
+                if start == nil { start = index }
+            } else if let from = start {
+                if index - from >= atLeast { runs.append(from..<index) }
+                start = nil
+            }
+        }
+        if let from = start, frames.count - from >= atLeast { runs.append(from..<frames.count) }
+        return runs
+    }
+
     public static var frameSeconds: TimeInterval { Rules.shared.frameSeconds }
 
     public static func energyFrames(of samples: [Float], sampleRate: Double) -> [Double] {
@@ -121,7 +189,11 @@ public enum SilenceHold {
     public static func speechThreshold(of frames: [Double]) -> Double {
         guard !frames.isEmpty else { return 0 }
         let room = frames.sorted()[Int(Double(frames.count) * Rules.shared.roomQuantile)]
-        return max(room * Rules.shared.speechAboveRoom, Rules.shared.quietestRoom)
+        return max(
+            room * Rules.shared.speechAboveRoom,
+            Rules.shared.quietestRoom,
+            speechLevel(of: frames) * Rules.shared.quietBelowVoice
+        )
     }
 
     public static func speechLevel(of frames: [Double]) -> Double {

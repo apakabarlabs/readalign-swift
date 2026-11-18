@@ -94,6 +94,15 @@ room_quantile: 0.1
 speech_above_room: 4
 quietest_room: 0.0001
 
+# However quiet the room, nothing quieter than this share of the voice is speech. A
+# synthesised voice can leave stretches of digital silence, and the quietest tenth of
+# the frames then falls on nothing at all: the room comes out as zero, and the hiss of
+# every pause between words stands above it and passes for speech. Measured against the
+# voice instead, the pauses of such a reading lie below half a percent of it and the
+# opening hiss of an "s" or an "f" well above two. Of 154 recorded sonnets none has its
+# room-based threshold below three percent, so this changes nothing there.
+quiet_below_voice: 0.02
+
 # How far past its own mark a word may be held.
 hold_limit: 0.6
 

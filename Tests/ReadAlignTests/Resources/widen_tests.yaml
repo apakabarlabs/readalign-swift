@@ -218,3 +218,129 @@ tests:
           - {start: 0.05, end: 0.10}
         want:
           - {word: 0, start: 0.05, end: 0.10}
+
+  - section: "Two words marked edge to edge"
+    cases:
+      - name: "a shared edge in the next word's opening sound goes back to the middle of the pause before it"
+        why: >
+          A list read in one breath comes back with its words marked edge to edge, and the
+          recogniser marks a word from where it is sure of it: the hiss of an "s" or an "f"
+          already sounds before the mark. Left there, the earlier word's cut ends on the
+          next word's first sound, and a learner hears "detergent s". From the shared mark
+          the sound is walked back to the pause the voice left, and the edge goes to its
+          middle, as two words with a gap between their marks meet there.
+        sample_rate: 1000
+        waveform:
+          - {level: 0.5, seconds: 0.30}
+          - {level: 0.001, seconds: 0.25}
+          - {level: 0.5, seconds: 0.30}
+        spans:
+          - {start: 0.00, end: 0.65}
+          - {start: 0.65, end: 0.85}
+        want:
+          - {word: 0, end: 0.425}
+          - {word: 1, start: 0.425}
+
+      - name: "a shared edge in the earlier word's closing sound goes on to the middle of the pause after it"
+        why: >
+          The same mistake the other way: the mark falls before the earlier word has
+          finished sounding, so the sound is walked on to the pause after it.
+        sample_rate: 1000
+        waveform:
+          - {level: 0.5, seconds: 0.30}
+          - {level: 0.001, seconds: 0.25}
+          - {level: 0.5, seconds: 0.30}
+        spans:
+          - {start: 0.00, end: 0.20}
+          - {start: 0.20, end: 0.85}
+        want:
+          - {word: 0, end: 0.425}
+          - {word: 1, start: 0.425}
+
+      - name: "marks that meet on one sample are edge to edge, whatever arithmetic placed them"
+        why: >
+          The same instant comes back a hair apart when the two marks were reached by
+          different sums, a piece's offset added to a time inside it. Compared in
+          samples, they still meet, and the edge they share is still moved out of the
+          next word's opening sound.
+        sample_rate: 1000
+        waveform:
+          - {level: 0.5, seconds: 0.30}
+          - {level: 0.001, seconds: 0.25}
+          - {level: 0.5, seconds: 0.30}
+        spans:
+          - {start: 0.00, end: 0.6500000000000001}
+          - {start: 0.65, end: 0.85}
+        want:
+          - {word: 0, end: 0.425}
+          - {word: 1, start: 0.425}
+
+      - name: "two words said in one breath keep the edge they share"
+        why: >
+          Words inside a line follow one another without a pause, and there is no quiet
+          near their shared mark to move it into.
+        sample_rate: 1000
+        waveform:
+          - {level: 0.5, seconds: 0.70}
+          - {level: 0.001, seconds: 0.30}
+        spans:
+          - {start: 0.00, end: 0.30}
+          - {start: 0.30, end: 0.70}
+        want:
+          - {word: 0, end: 0.30}
+          - {word: 1, start: 0.30}
+
+      - name: "the stop before a consonant is not a pause to move a shared edge into"
+        why: >
+          A word's own stop is quiet too, but shorter than a pause, and an edge moved into
+          it would cut a word in half.
+        sample_rate: 1000
+        waveform:
+          - {level: 0.5, seconds: 0.20}
+          - {level: 0.001, seconds: 0.06}
+          - {level: 0.5, seconds: 0.30}
+        spans:
+          - {start: 0.00, end: 0.40}
+          - {start: 0.40, end: 0.56}
+        want:
+          - {word: 0, end: 0.40}
+          - {word: 1, start: 0.40}
+
+      - name: "a short word before a pause keeps its edge with the word before it"
+        why: >
+          Walked on from the mark, the short word's sound soon gives way to the pause after
+          it, but that pause is the short word's own: moved there, the edge would leave it
+          nothing. An edge goes no further than the middle of the neighbour it moves into.
+        sample_rate: 1000
+        waveform:
+          - {level: 0.5, seconds: 0.30}
+          - {level: 0.5, seconds: 0.10}
+          - {level: 0.001, seconds: 0.50}
+          - {level: 0.5, seconds: 0.20}
+        spans:
+          - {start: 0.00, end: 0.30}
+          - {start: 0.30, end: 0.90}
+          - {start: 0.90, end: 1.10}
+        want:
+          - {word: 0, end: 0.30}
+          - {word: 1, start: 0.30}
+
+      - name: "digital silence in a reading does not turn the hiss of its pauses into speech"
+        why: >
+          A synthesised voice leaves stretches of exact zero, and the quietest tenth of
+          the frames falls on them: measured against the room alone, the faint hiss of
+          the pause between two words would stand above it as speech, there would be no
+          pause to move the shared edge into, and the earlier word would end on the next
+          one's opening sound. Measured against the voice, the hiss is quiet.
+        sample_rate: 1000
+        waveform:
+          - {level: 0.0, seconds: 0.20}
+          - {level: 0.5, seconds: 0.30}
+          - {level: 0.004, seconds: 0.25}
+          - {level: 0.5, seconds: 0.30}
+        spans:
+          - {start: 0.20, end: 0.85}
+          - {start: 0.85, end: 1.05}
+        want:
+          - {word: 0, end: 0.625}
+          - {word: 1, start: 0.625}
