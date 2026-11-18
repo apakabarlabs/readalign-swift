@@ -134,8 +134,12 @@ public enum SilenceHold {
             let following = settled[index + 1]
             guard (word.end * sampleRate).rounded() <= (following.start * sampleRate).rounded()
             else { continue }
-            let loud = [following.start, word.end].filter { edge in
-                let frame = Int((edge / eachFrame).rounded())
+            let touching =
+                (word.end * sampleRate).rounded() == (following.start * sampleRate).rounded()
+            let start = EdgeInSound(time: following.start, looksBack: true, looksOn: touching)
+            let end = EdgeInSound(time: word.end, looksBack: touching, looksOn: true)
+            let loud = [start, end].filter { edge in
+                let frame = Int((edge.time / eachFrame).rounded())
                 return frame > 0 && frame < frames.count
                     && frames[frame - 1] >= threshold && frames[frame] >= threshold
             }
@@ -147,9 +151,12 @@ public enum SilenceHold {
                 let quietFrom = Double(run.lowerBound) * eachFrame
                 let quietUntil = Double(run.upperBound) * eachFrame
                 let distance =
-                    loud.map { edge in
-                        quietUntil <= edge ? edge - quietUntil : quietFrom - edge
-                    }.min() ?? limit
+                    loud.compactMap { edge -> TimeInterval? in
+                        if quietUntil <= edge.time {
+                            return edge.looksBack ? edge.time - quietUntil : nil
+                        }
+                        return edge.looksOn ? quietFrom - edge.time : nil
+                    }.min() ?? .infinity
                 let middle = (quietFrom + quietUntil) / 2
                 guard distance <= limit, middle >= lowest, middle <= highest else { return nil }
                 return (distance, middle)
@@ -159,6 +166,12 @@ public enum SilenceHold {
             settled[index + 1] = WordSpan(start: nearest.middle, end: following.end)
         }
         return settled
+    }
+
+    private struct EdgeInSound {
+        let time: TimeInterval
+        let looksBack: Bool
+        let looksOn: Bool
     }
 
     private static func quietRuns(

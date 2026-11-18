@@ -398,3 +398,25 @@ tests:
         want:
           - {word: 0, end: 0.30}
           - {word: 1, start: 0.35}
+
+      - name: "an end in sound goes on to the pause after it, not back to a pause inside its own word"
+        why: >
+          A word can hold a pause of its own, a held breath before its last syllable, and
+          when its mark ends inside that last syllable the pause behind it may lie nearer
+          than the one ahead. Moved back there, the cut would hand the last syllable to the
+          next word. An end with a gap after its mark looks only on for its pause, and a
+          start with a gap before its mark only back; an edge two words share looks both
+          ways, as it always did.
+        sample_rate: 1000
+        waveform:
+          - {level: 0.5, seconds: 0.30}
+          - {level: 0.001, seconds: 0.30}
+          - {level: 0.5, seconds: 0.20}
+          - {level: 0.001, seconds: 0.30}
+          - {level: 0.5, seconds: 0.30}
+        spans:
+          - {start: 0.00, end: 0.68}
+          - {start: 1.25, end: 1.40}
+        want:
+          - {word: 0, end: 0.95}
+          - {word: 1, start: 0.95}
