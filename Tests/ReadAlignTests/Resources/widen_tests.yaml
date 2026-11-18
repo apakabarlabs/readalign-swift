@@ -344,3 +344,57 @@ tests:
         want:
           - {word: 0, end: 0.625}
           - {word: 1, start: 0.625}
+
+  - section: "Two words with a gap between their marks"
+    cases:
+      - name: "a start marked inside the vowel the word opens with goes back to the middle of the pause before it"
+        why: >
+          A word that opens with a vowel is marked from where the recogniser is sure of
+          it, a fifth of a second into the vowel, while the word before is marked to end
+          where that vowel begins. The gap between the marks is the vowel's own first
+          stretch, not quiet, and its middle is still inside the vowel: cut there, the
+          learner hears the word without its first sound. From the start in sound, both
+          words meet in the middle of the pause the voice left before the vowel.
+        sample_rate: 1000
+        waveform:
+          - {level: 0.5, seconds: 0.30}
+          - {level: 0.001, seconds: 0.25}
+          - {level: 0.5, seconds: 0.30}
+        spans:
+          - {start: 0.00, end: 0.55}
+          - {start: 0.70, end: 0.85}
+        want:
+          - {word: 0, end: 0.425}
+          - {word: 1, start: 0.425}
+
+      - name: "an end marked before the word stops sounding goes on to the middle of the pause after it"
+        why: >
+          The same mistake the other way: the earlier word's mark ends while it still
+          sounds, and the gap after it holds the rest of the word. The end is walked on
+          to the pause after it and both words meet in its middle.
+        sample_rate: 1000
+        waveform:
+          - {level: 0.5, seconds: 0.30}
+          - {level: 0.001, seconds: 0.25}
+          - {level: 0.5, seconds: 0.30}
+        spans:
+          - {start: 0.00, end: 0.20}
+          - {start: 0.60, end: 0.85}
+        want:
+          - {word: 0, end: 0.425}
+          - {word: 1, start: 0.425}
+
+      - name: "a gap inside one breath leaves both marks where they are"
+        why: >
+          Two words said without a pause can come back with a sliver between their marks,
+          and with no quiet near it there is nowhere to move either edge.
+        sample_rate: 1000
+        waveform:
+          - {level: 0.5, seconds: 0.70}
+          - {level: 0.001, seconds: 0.30}
+        spans:
+          - {start: 0.00, end: 0.30}
+          - {start: 0.35, end: 0.70}
+        want:
+          - {word: 0, end: 0.30}
+          - {word: 1, start: 0.35}

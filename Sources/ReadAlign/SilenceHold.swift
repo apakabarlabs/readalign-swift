@@ -47,11 +47,13 @@ public enum SilenceHold {
     /// to give either of them. So does an edge that would move by less than
     /// `least_widening`, each edge judged on its own and the distance counted in samples.
     ///
-    /// Two words marked edge to edge share that edge, and where it falls inside a sound it
-    /// goes first to the middle of the nearest pause within `limit`, as two words with a gap
-    /// between their marks meet there: the recogniser marks a word from where it is sure of it, so the opening hiss
-    /// of the next word sounds before its mark. It goes no further than the middle of
-    /// either word, so a short word keeps the pause after it.
+    /// Where an edge between two words falls inside a sound, both words first meet in the
+    /// middle of the nearest pause within `limit` of it: the recogniser marks a word from
+    /// where it is sure of it, so the opening hiss of the next word, or the first stretch of
+    /// a vowel it opens with, sounds before its mark. That holds for two words marked edge
+    /// to edge and for two with a gap between their marks alike, since the gap can lie in
+    /// the next word's own sound. The edge goes no further than the middle of either word,
+    /// so a short word keeps the pause after it, and words whose marks overlap keep them.
     public static func widened(
         _ spans: [WordSpan],
         samples: [Float],
@@ -130,20 +132,24 @@ public enum SilenceHold {
         for index in settled.indices.dropLast() {
             let word = settled[index]
             let following = settled[index + 1]
-            guard (word.end * sampleRate).rounded() == (following.start * sampleRate).rounded()
+            guard (word.end * sampleRate).rounded() <= (following.start * sampleRate).rounded()
             else { continue }
-            let seam = following.start
-            let frame = Int((seam / eachFrame).rounded())
-            guard frame > 0, frame < frames.count,
-                frames[frame - 1] >= threshold, frames[frame] >= threshold
-            else { continue }
-            let lowest = (word.start + seam) / 2
+            let loud = [following.start, word.end].filter { edge in
+                let frame = Int((edge / eachFrame).rounded())
+                return frame > 0 && frame < frames.count
+                    && frames[frame - 1] >= threshold && frames[frame] >= threshold
+            }
+            guard !loud.isEmpty else { continue }
+            let lowest = (word.start + word.end) / 2
             let highest = (following.start + following.end) / 2
             let reachable = pauses.compactMap {
                 run -> (distance: TimeInterval, middle: TimeInterval)? in
                 let quietFrom = Double(run.lowerBound) * eachFrame
                 let quietUntil = Double(run.upperBound) * eachFrame
-                let distance = quietUntil <= seam ? seam - quietUntil : quietFrom - seam
+                let distance =
+                    loud.map { edge in
+                        quietUntil <= edge ? edge - quietUntil : quietFrom - edge
+                    }.min() ?? limit
                 let middle = (quietFrom + quietUntil) / 2
                 guard distance <= limit, middle >= lowest, middle <= highest else { return nil }
                 return (distance, middle)

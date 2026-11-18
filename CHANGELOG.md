@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.22.0
+
+### Changed
+- `SilenceHold.widened` moves an edge in sound to the middle of the nearest pause whether
+  the two words are marked edge to edge or with a gap between their marks. A word that
+  opens with a vowel is marked a fifth of a second into it, while the word before is
+  marked to end where the vowel begins; the gap was the vowel itself, and the start was
+  cut inside it. Words whose marks overlap still keep them.
+
 ## 0.21.0
 
 ### Changed
